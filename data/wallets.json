@@ -1,0 +1,7 @@
+{
+  "Alice": {
+    "public_key": "abc123...",
+    "address": "wallet_alice_001",
+    "balance": 1000000
+  }
+}
