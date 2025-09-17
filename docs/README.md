@@ -128,8 +128,6 @@ python tests/test_signature.py
 # Test xác thực
 python tests/test_verification.py
 
-# Chạy tất cả test
-python tests/run_all_tests.py
 ```
 
 ## 📊 Demo kết quả
