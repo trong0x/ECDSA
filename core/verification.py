@@ -7,46 +7,49 @@ from core.transaction import get_transaction_by_id, get_latest_transaction
 from security.fraud_detection import check_fraud
 
 def verify_signature(transaction):
-    """Xác minh chữ ký ECDSA"""
+    """Xác minh chữ ký ECDSA (chỉ verify trên dữ liệu gốc)."""
     try:
-        # 1. Lấy thông tin cần thiết từ giao dịch
         signature_hex = transaction.get("signature")
         from_user = transaction.get("from")
-        
+
         if not signature_hex:
             return False, "Giao dịch chưa có chữ ký"
-            
         if not from_user:
             return False, "Giao dịch thiếu thông tin người gửi"
-        
-        # 2. Lấy khóa công khai của người gửi
+
+        # Lấy khóa công khai
         sender_wallet = get_wallet_info(from_user)
         if not sender_wallet:
             return False, f"Không tìm thấy ví của {from_user}"
-        
+
         public_key_hex = sender_wallet["public_key"]
         public_key = VerifyingKey.from_string(bytes.fromhex(public_key_hex), curve=SECP256k1)
-        
-        # 3. Tái tạo hash từ transaction data (không bao gồm signature)
-        transaction_copy = transaction.copy()
-        if "signature" in transaction_copy:
-            del transaction_copy["signature"]
-            
-        json_string = json.dumps(transaction_copy, sort_keys=True, separators=(',', ':'))
+
+        # Chỉ lấy các trường gốc để verify
+        fields_to_sign = {
+            "id": transaction["id"],
+            "from": transaction["from"],
+            "to": transaction["to"],
+            "amount": transaction["amount"],
+            "timestamp": transaction["timestamp"],
+            "from_address": transaction["from_address"],
+            "to_address": transaction["to_address"]
+        }
+
+        json_string = json.dumps(fields_to_sign, sort_keys=True, separators=(',', ':'))
         message_hash = hashlib.sha256(json_string.encode('utf-8')).digest()
-        
-        # 4. Verify signature với public key
+
+        # Verify chữ ký
         signature_bytes = bytes.fromhex(signature_hex)
-        
         try:
             public_key.verify(signature_bytes, message_hash)
             return True, "Chữ ký hợp lệ"
         except:
             return False, "Chữ ký không hợp lệ"
-            
+
     except Exception as e:
         return False, f"Lỗi xác minh chữ ký: {str(e)}"
-
+   
 def check_balance(from_user, amount):
     """Kiểm tra số dư đủ không"""
     try:
@@ -63,6 +66,8 @@ def check_balance(from_user, amount):
             
     except Exception as e:
         return False, f"Lỗi kiểm tra số dư: {str(e)}"
+
+
 
 def validate_transaction_format(transaction):
     """Kiểm tra format giao dịch"""
@@ -82,29 +87,6 @@ def validate_transaction_format(transaction):
         
     return True, "Format hợp lệ"
 
-def execute_transaction(transaction):
-    """Thực hiện giao dịch (chuyển tiền)"""
-    try:
-        from_user = transaction["from"]
-        to_user = transaction["to"]
-        amount = transaction["amount"]
-        
-        # Lấy thông tin ví
-        sender_wallet = get_wallet_info(from_user)
-        receiver_wallet = get_wallet_info(to_user)
-        
-        # Tính số dư mới
-        new_sender_balance = sender_wallet["balance"] - amount
-        new_receiver_balance = receiver_wallet["balance"] + amount
-        
-        # Cập nhật số dư
-        update_balance(from_user, new_sender_balance)
-        update_balance(to_user, new_receiver_balance)
-        
-        return True, f"Chuyển tiền thành công: {amount:,} VND từ {from_user} đến {to_user}"
-        
-    except Exception as e:
-        return False, f"Lỗi thực hiện giao dịch: {str(e)}"
 
 def update_transaction_status(tx_id, new_status):
     """Cập nhật status của giao dịch trong file JSON"""
@@ -179,17 +161,27 @@ def full_verification_flow(tx_id=None):
         all_checks_passed = signature_valid and balance_valid and fraud_check_passed
         
         # 6. Nếu pass hết → Execute transaction SAU KHI xác thực xong
+        all_checks_passed=signature_valid and balance_valid and fraud_check_passed
         execution_msg = ""
+        # 
         if all_checks_passed:
-            execute_success, exec_msg = execute_transaction(transaction)
-            execution_msg = f" | {exec_msg}"
-            
-            # Cập nhật status giao dịch TRONG file JSON
-            update_transaction_status(transaction["id"], "verified" if execute_success else "failed")
+        # ✅ Thực hiện giao dịch tại bước verify
+            sender_wallet = get_wallet_info(transaction["from"])
+            receiver_wallet = get_wallet_info(transaction["to"])
+
+            new_sender_balance = sender_wallet["balance"] - transaction["amount"]
+            new_receiver_balance = receiver_wallet["balance"] + transaction["amount"]
+
+            update_balance(transaction["from"], new_sender_balance)
+            update_balance(transaction["to"], new_receiver_balance)
+
+            transaction["executed"] = True
+            update_transaction_status(transaction["id"], "verified")
+
+            execution_msg = f" | Đã thực hiện giao dịch thành công: {transaction['amount']:,} VND"
         else:
-            # Cập nhật status là rejected
             update_transaction_status(transaction["id"], "rejected")
-        
+            execution_msg = " | Giao dịch bị từ chối"
         # 7. Return kết quả chi tiết  
         final_status = "verified" if all_checks_passed else "rejected"
         result = {

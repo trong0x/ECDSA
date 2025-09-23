@@ -3,7 +3,7 @@ import json
 import hashlib
 import os
 from datetime import datetime
-from core.wallet import get_wallet_info, get_private_key
+from core.wallet import get_wallet_info, get_private_key,update_balance
 
 def create_transaction(from_user, to_user, amount):
     """Tạo giao dịch mới"""
@@ -45,37 +45,44 @@ def create_transaction(from_user, to_user, amount):
         raise Exception(f"Lỗi tạo giao dịch: {str(e)}")
 
 def sign_transaction(transaction, from_user):
-    """Ký giao dịch bằng ECDSA"""
+    """Ký giao dịch bằng ECDSA và cập nhật số dư (ký trên chính bản sẽ lưu)."""
     try:
-        # 1. Lấy khóa riêng của người gửi
+    
+        # 1. Lấy khóa riêng
         private_key = get_private_key(from_user)
-        
-        # 2. Chuyển transaction thành JSON string (loại bỏ signature nếu có)
-        transaction_copy = transaction.copy()
-        if "signature" in transaction_copy:
-            del transaction_copy["signature"]
-            
-        # Sắp xếp keys để đảm bảo consistent
-        json_string = json.dumps(transaction_copy, sort_keys=True, separators=(',', ':'))
-        
-        # 3. Hash bằng SHA256
+
+        # 2. Chỉ lấy các trường gốc để ký
+        fields_to_sign = {
+            "id": transaction["id"],
+            "from": transaction["from"],
+            "to": transaction["to"],
+            "amount": transaction["amount"],
+            "timestamp": transaction["timestamp"],
+            "from_address": transaction["from_address"],
+            "to_address": transaction["to_address"]
+        }
+
+        # 3. Hash dữ liệu
+        json_string = json.dumps(fields_to_sign, sort_keys=True, separators=(',', ':'))
         message_hash = hashlib.sha256(json_string.encode('utf-8')).digest()
-        
-        # 4. Ký hash bằng private key
+
+        # 4. Ký hash
         signature = private_key.sign(message_hash)
-        
-        # 5. Thêm signature vào transaction
+
+        # 5. Tạo giao dịch đã ký (thêm chữ ký và trạng thái)
         signed_transaction = transaction.copy()
         signed_transaction["signature"] = signature.hex()
         signed_transaction["status"] = "signed"
-        
-        # 6. Lưu giao dịch đã ký
+        signed_transaction["executed"] = False
+
+        # 6. Lưu giao dịch
         save_transaction(signed_transaction)
-        
+
         return signed_transaction
-        
+
     except Exception as e:
         raise Exception(f"Lỗi ký giao dịch: {str(e)}")
+    
 
 def save_transaction(signed_tx):
     """Lưu giao dịch vào file"""
