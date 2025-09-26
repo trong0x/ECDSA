@@ -1,161 +1,117 @@
-from ecdsa import SigningKey, VerifyingKey, SECP256k1
 import json
-import hashlib
 import os
+import uuid
+import hashlib
 from datetime import datetime
-from core.wallet import get_wallet_info, get_private_key,update_balance
+from core.wallet import get_private_key
 
-def create_transaction(from_user, to_user, amount):
-    """Tạo giao dịch mới"""
+TRANSACTIONS_FILE = "data/transactions.json"
+
+# ------------------ Load & Save ------------------ #
+def load_transactions():
+    """Load danh sách giao dịch từ file JSON, luôn trả về list."""
+    if not os.path.exists(TRANSACTIONS_FILE):
+        return []
     try:
-        # 1. Kiểm tra ví người gửi tồn tại
-        sender_wallet = get_wallet_info(from_user)
-        if not sender_wallet:
-            raise Exception(f"Không tìm thấy ví của {from_user}")
-        
-        # 2. Kiểm tra ví người nhận tồn tại  
-        receiver_wallet = get_wallet_info(to_user)
-        if not receiver_wallet:
-            raise Exception(f"Không tìm thấy ví của {to_user}")
-            
-        # 3. Kiểm tra số dư đủ không
-        if sender_wallet["balance"] < amount:
-            raise Exception(f"Số dư không đủ. Có: {sender_wallet['balance']:,}, Cần: {amount:,}")
-        
-        # 4. Tạo ID giao dịch unique
-        timestamp = datetime.now().isoformat()
-        tx_string = f"{from_user}{to_user}{amount}{timestamp}"
-        tx_id = hashlib.sha256(tx_string.encode()).hexdigest()[:16]
-        
-        # 5. Tạo dict giao dịch
-        transaction = {
-            "id": f"TX_{tx_id}",
-            "from": from_user,
-            "to": to_user,
-            "amount": amount,
-            "timestamp": timestamp,
-            "from_address": sender_wallet["address"],
-            "to_address": receiver_wallet["address"],
-            "status": "pending"
-        }
-        
-        return transaction
-        
-    except Exception as e:
-        raise Exception(f"Lỗi tạo giao dịch: {str(e)}")
+        with open(TRANSACTIONS_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            # Nếu file trước đây là dict (id -> tx), chuyển sang list
+            if isinstance(data, dict):
+                return list(data.values())
+            if isinstance(data, list):
+                return data
+            return []
+    except (json.JSONDecodeError, IOError):
+        return []
 
-def sign_transaction(transaction, from_user):
-    """Ký giao dịch bằng ECDSA và cập nhật số dư (ký trên chính bản sẽ lưu)."""
-    try:
-    
-        # 1. Lấy khóa riêng
-        private_key = get_private_key(from_user)
 
-        # 2. Chỉ lấy các trường gốc để ký
-        fields_to_sign = {
-            "id": transaction["id"],
-            "from": transaction["from"],
-            "to": transaction["to"],
-            "amount": transaction["amount"],
-            "timestamp": transaction["timestamp"],
-            "from_address": transaction["from_address"],
-            "to_address": transaction["to_address"]
-        }
 
-        # 3. Hash dữ liệu
-        json_string = json.dumps(fields_to_sign, sort_keys=True, separators=(',', ':'))
-        message_hash = hashlib.sha256(json_string.encode('utf-8')).digest()
+def save_transactions(transactions):
+    """Lưu toàn bộ danh sách giao dịch (list)."""
+    os.makedirs(os.path.dirname(TRANSACTIONS_FILE) or ".", exist_ok=True)
+    with open(TRANSACTIONS_FILE, "w", encoding="utf-8") as f:
+        json.dump(transactions, f, indent=2, ensure_ascii=False)
 
-        # 4. Ký hash
-        signature = private_key.sign(message_hash)
+def save_transaction(tx):
+    """Thêm hoặc cập nhật một giao dịch (dạng list trong file)."""
+    transactions = load_transactions()
+    # cập nhật nếu tồn tại
+    for i, t in enumerate(transactions):
+        if t.get("id") == tx.get("id"):
+            transactions[i] = tx
+            break
+    else:
+        transactions.append(tx)
+    save_transactions(transactions)
 
-        # 5. Tạo giao dịch đã ký (thêm chữ ký và trạng thái)
-        signed_transaction = transaction.copy()
-        signed_transaction["signature"] = signature.hex()
-        signed_transaction["status"] = "signed"
-        signed_transaction["executed"] = False
+# ------------------ Tạo & Ký ------------------ #
+def create_transaction(from_user, to_user, amount, from_address=None, to_address=None):
+    """Tạo một giao dịch mới (chưa ký). Timestamp ISO để tương thích kiểm tra."""
 
-        # 6. Lưu giao dịch
-        save_transaction(signed_transaction)
+    if int(amount) <= 0:
+       raise ValueError("Số tiền giao dịch phải lớn hơn 0")
 
-        return signed_transaction
+    tx = {
+        "id": str(uuid.uuid4()),
+        "from": from_user,
+        "to": to_user,
+        "from_address": from_address,
+        "to_address": to_address,
+        "amount": int(amount),
+        "timestamp": datetime.now().isoformat(),
+        "status": "pending",
+        "signature": None,
+        "executed": False
+    }
+    # Lưu tạm (chưa ký) để tồn tại trong lịch sử
+    save_transaction(tx)
+    return tx
 
-    except Exception as e:
-        raise Exception(f"Lỗi ký giao dịch: {str(e)}")
-    
+def sign_transaction(transaction, from_user, passphrase):
+    """Ký giao dịch bằng private key đã mã hóa (yêu cầu passphrase)."""
+    # Ensure transaction is a dict
+    if not isinstance(transaction, dict):
+        raise ValueError("Transaction phải là dict")
 
-def save_transaction(signed_tx):
-    """Lưu giao dịch vào file"""
-    try:
-        transactions_file = "data/transactions.json"
-        
-        # Tạo thư mục data nếu chưa có
-        os.makedirs("data", exist_ok=True)
-        
-        # Đọc transactions hiện tại
-        if os.path.exists(transactions_file):
-            with open(transactions_file, 'r', encoding='utf-8') as f:
-                transactions = json.load(f)
-        else:
-            transactions = []
-        
-        # Thêm giao dịch mới
-        transactions.append(signed_tx)
-        
-        # Ghi lại file
-        with open(transactions_file, 'w', encoding='utf-8') as f:
-            json.dump(transactions, f, indent=2, ensure_ascii=False)
-            
-        print(f"✅ Đã lưu giao dịch {signed_tx['id']}")
-        
-    except Exception as e:
-        raise Exception(f"Lỗi lưu giao dịch: {str(e)}")
+    private_key = get_private_key(from_user, passphrase)
+
+    fields_to_sign = {
+        "id": transaction.get("id"),
+        "from": transaction.get("from"),
+        "to": transaction.get("to"),
+        "amount": transaction.get("amount"),
+        "timestamp": transaction.get("timestamp"),
+        "from_address": transaction.get("from_address"),
+        "to_address": transaction.get("to_address")
+    }
+    json_string = json.dumps(fields_to_sign, sort_keys=True, separators=(',', ':'))
+    message_hash = hashlib.sha256(json_string.encode('utf-8')).digest()
+
+    signature = private_key.sign(message_hash)
+    transaction["signature"] = signature.hex()
+    transaction["status"] = "signed"
+    transaction["executed"] = False
+
+    save_transaction(transaction)
+    return transaction
+
+# ------------------ Truy vấn ------------------ #
+def get_all_transactions():
+    """Trả về danh sách tất cả giao dịch (list)."""
+    return load_transactions()
 
 def get_transaction_by_id(tx_id):
-    """Lấy giao dịch theo ID"""
-    try:
-        transactions_file = "data/transactions.json"
-        
-        if os.path.exists(transactions_file):
-            with open(transactions_file, 'r', encoding='utf-8') as f:
-                transactions = json.load(f)
-                
-            for tx in transactions:
-                if tx["id"] == tx_id:
-                    return tx
-                    
-        return None
-        
-    except Exception as e:
-        raise Exception(f"Lỗi tìm giao dịch: {str(e)}")
+    """Trả về giao dịch theo ID hoặc None nếu không có."""
+    transactions = load_transactions()
+    for tx in transactions:
+        if tx.get("id") == tx_id:
+            return tx
+    return None
 
 def get_latest_transaction():
-    """Lấy giao dịch mới nhất"""
-    try:
-        transactions_file = "data/transactions.json"
-        
-        if os.path.exists(transactions_file):
-            with open(transactions_file, 'r', encoding='utf-8') as f:
-                transactions = json.load(f)
-                
-            if transactions:
-                return transactions[-1]  # Giao dịch cuối cùng
-                
+    """Trả về giao dịch mới nhất (theo timestamp ISO)."""
+    transactions = load_transactions()
+    if not transactions:
         return None
-        
-    except Exception as e:
-        raise Exception(f"Lỗi lấy giao dịch mới nhất: {str(e)}")
-
-def get_all_transactions():
-    """Lấy tất cả giao dịch"""
-    try:
-        transactions_file = "data/transactions.json"
-        
-        if os.path.exists(transactions_file):
-            with open(transactions_file, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        else:
-            return []
-            
-    except Exception as e:
-        raise Exception(f"Lỗi lấy danh sách giao dịch: {str(e)}")
+    # timestamp là ISO string — so sánh lexicographically OK for ISO
+    return max(transactions, key=lambda x: x.get("timestamp", ""))

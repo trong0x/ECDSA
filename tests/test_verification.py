@@ -5,7 +5,7 @@ sys.path.append('..')
 from core.wallet import create_wallet, get_wallet_info
 from core.transaction import create_transaction, sign_transaction
 from core.verification import full_verification_flow, verify_signature, check_balance
-from security.fraud_detection import check_fraud, check_double_spending
+from core.fraud_detection import check_fraud, check_double_spending
 
 def test_valid_transaction():
     """Test giao dịch hợp lệ"""

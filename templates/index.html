@@ -597,47 +597,39 @@
 
         <!-- Create Wallet Section -->
         <section id="create-wallet" class="section hidden">
-            <h2 class="section-title">
-                <i class="fas fa-wallet"></i>
-                Tạo ví mới
-            </h2>
+            <h2 class="section-title"><i class="fas fa-wallet"></i> Tạo ví mới</h2>
             <div class="form-group">
                 <label class="form-label">Tên chủ ví:</label>
                 <input id="wallet-name" type="text" class="form-control" placeholder="Nhập tên ví">
             </div>
-            <button onclick="createWallet()" class="btn">
-                <i class="fas fa-plus"></i>
-                Tạo ví
-            </button>
+            <div class="form-group">
+                <label class="form-label">Passphrase (bảo vệ private key):</label>
+                <input id="wallet-passphrase" type="password" class="form-control" placeholder="Nhập passphrase">
+            </div>
+            <button onclick="createWallet()" class="btn"><i class="fas fa-plus"></i> Tạo ví</button>
             <div id="create-wallet-result" class="result-display"></div>
         </section>
 
         <!-- Create Transaction Section -->
         <section id="create-transaction" class="section hidden">
-            <h2 class="section-title">
-                <i class="fas fa-exchange-alt"></i>
-                Tạo giao dịch
-            </h2>
+            <h2 class="section-title"><i class="fas fa-exchange-alt"></i> Tạo giao dịch</h2>
             <div class="form-group">
                 <label class="form-label">Người gửi:</label>
-                <select id="from-user" class="form-control">
-                    <option value="">Chọn ví gửi</option>
-                </select>
+                <select id="from-user" class="form-control"><option value="">Chọn ví gửi</option></select>
             </div>
             <div class="form-group">
                 <label class="form-label">Người nhận:</label>
-                <select id="to-user" class="form-control">
-                    <option value="">Chọn ví nhận</option>
-                </select>
+                <select id="to-user" class="form-control"><option value="">Chọn ví nhận</option></select>
             </div>
             <div class="form-group">
                 <label class="form-label">Số tiền (VND):</label>
                 <input id="amount" type="number" class="form-control" placeholder="Nhập số tiền">
             </div>
-            <button onclick="createTransaction()" class="btn">
-                <i class="fas fa-paper-plane"></i>
-                Tạo và ký giao dịch
-            </button>
+            <div class="form-group">
+                <label class="form-label">Passphrase của ví gửi:</label>
+                <input id="tx-passphrase" type="password" class="form-control" placeholder="Nhập passphrase để ký giao dịch">
+            </div>
+            <button onclick="createTransaction()" class="btn"><i class="fas fa-paper-plane"></i> Tạo và ký giao dịch</button>
             <div id="create-transaction-result" class="result-display"></div>
         </section>
 
@@ -762,45 +754,43 @@
         // Hàm tạo ví
         async function createWallet() {
             const name = document.getElementById('wallet-name').value;
+            const passphrase = document.getElementById('wallet-passphrase').value;
             const resultDiv = document.getElementById('create-wallet-result');
-            
-            if (!name) {
-                resultDiv.innerHTML = '<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Vui lòng nhập tên ví!</span></div>';
+
+        if (!name || !passphrase) {
+            resultDiv.innerHTML = '<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Vui lòng nhập tên ví và passphrase!</span></div>';
+            resultDiv.className = 'result-display error';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/create-wallet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, passphrase })
+            });
+            const result = await response.json();
+
+            if (result.error) {
+                resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>${result.error}</span></div>`;
                 resultDiv.className = 'result-display error';
-                return;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="verification-status success"><i class="fas fa-check-circle status-icon"></i><span>Tạo ví thành công!</span></div>
+                    <div style="margin-top: 1rem; color: white;">
+                    <p><strong>Tên:</strong> ${result.name}</p>
+                    <p><strong>Địa chỉ:</strong> ${result.address}</p>
+                    <p><strong>Số dư:</strong> ${result.balance.toLocaleString()} VND</p>
+                    </div>`;
+                resultDiv.className = 'result-display success';
+                populateWallets();
+                updateDashboard();
+                document.getElementById('wallet-name').value = '';
+                document.getElementById('wallet-passphrase').value = '';
             }
-            
-            try {
-                const response = await fetch('/api/create-wallet', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name })
-                });
-                const result = await response.json();
-                
-                if (result.error) {
-                    resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>${result.error}</span></div>`;
-                    resultDiv.className = 'result-display error';
-                } else {
-                    resultDiv.innerHTML = `
-                        <div class="verification-status success">
-                            <i class="fas fa-check-circle status-icon"></i>
-                            <span>Tạo ví thành công!</span>
-                        </div>
-                        <div style="margin-top: 1rem; color: white;">
-                            <p><strong>Tên:</strong> ${result.name}</p>
-                            <p><strong>Địa chỉ:</strong> ${result.address}</p>
-                            <p><strong>Số dư:</strong> ${result.balance.toLocaleString()} VND</p>
-                        </div>
-                    `;
-                    resultDiv.className = 'result-display success';
-                    populateWallets();
-                    updateDashboard();
-                    document.getElementById('wallet-name').value = '';
-                }
-            } catch (error) {
-                resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Lỗi: ${error.message}</span></div>`;
-                resultDiv.className = 'result-display error';
+        } catch (error) {
+            resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Lỗi: ${error.message}</span></div>`;
+            resultDiv.className = 'result-display error';
             }
         }
 
@@ -809,9 +799,10 @@
             const fromUser = document.getElementById('from-user').value;
             const toUser = document.getElementById('to-user').value;
             const amount = parseInt(document.getElementById('amount').value);
+            const passphrase=document.getElementById('tx-passphrase').value;
             const resultDiv = document.getElementById('create-transaction-result');
             
-            if (!fromUser || !toUser || !amount) {
+            if (!fromUser || !toUser || !amount || !passphrase) {
                 resultDiv.innerHTML = '<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Vui lòng điền đầy đủ thông tin!</span></div>';
                 resultDiv.className = 'result-display error';
                 return;
@@ -821,7 +812,7 @@
                 const response = await fetch('/api/create-transaction', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ from_user: fromUser, to_user: toUser, amount })
+                    body: JSON.stringify({ from_user: fromUser, to_user: toUser, amount , passphrase})
                 });
                 const result = await response.json();
                 
@@ -848,6 +839,7 @@
                     document.getElementById('from-user').value = '';
                     document.getElementById('to-user').value = '';
                     document.getElementById('amount').value = '';
+                    document.getElementById('tx-passphrase').value = '';
                 }
             } catch (error) {
                 resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Lỗi: ${error.message}</span></div>`;

@@ -4,7 +4,7 @@ import hashlib
 import os
 from core.wallet import get_wallet_info, update_balance
 from core.transaction import get_transaction_by_id, get_latest_transaction
-from security.fraud_detection import check_fraud
+from core.fraud_detection import check_fraud
 
 def verify_signature(transaction):
     """Xác minh chữ ký ECDSA (chỉ verify trên dữ liệu gốc)."""
@@ -77,9 +77,9 @@ def validate_transaction_format(transaction):
         if field not in transaction:
             return False, f"Thiếu trường {field}"
             
-    # Kiểm tra amount phải là số dương
+    # Kiểm tra amount phải là số dương (cải thiện thông báo cho số âm)
     if not isinstance(transaction["amount"], (int, float)) or transaction["amount"] <= 0:
-        return False, "Số tiền phải là số dương"
+        return False, "Số tiền phải lớn hơn 0 (không chấp nhận số âm hoặc 0)"
         
     # Kiểm tra người gửi và nhận khác nhau
     if transaction["from"] == transaction["to"]:

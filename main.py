@@ -1,121 +1,139 @@
-from core.wallet import create_wallet, get_wallet_info
-from core.transaction import create_transaction, sign_transaction
-from core.verification import full_verification_flow
+# main.py
+import uuid
+import time
+import traceback
+from getpass import getpass
+from core.wallet import create_wallet, get_wallet_info, update_balance
+from core.transaction import sign_transaction, load_transactions
 
-def main():
-    """Menu chính"""
-    print(" HỆ THỐNG XÁC THỰC VÍ ĐIỆN TỬ ECDSA ")
-    
-    while True:
-        print("\n" + "="*50)
-        print("1. Tạo ví mới")
-        print("2. Tạo giao dịch")
-        print("3. Xác thực giao dịch")  # Chức năng chính
-        print("4. Xem thông tin ví")
-        print("0. Thoát")
-        print("="*50)
-        
-        choice = input("Chọn chức năng: ")
-        
-        if choice == "1":
-            # Tạo ví mới
-            print("\nTẠO VÍ MỚI")
-            name = input("Nhập tên chủ ví: ")
-            try:
-                wallet_info = create_wallet(name)
-                print(f"Tạo ví thành công!")
-                print(f"Tên: {wallet_info['name']}")
-                print(f"Địa chỉ: {wallet_info['address']}")
-                print(f"Số dư ban đầu: {wallet_info['balance']:,} VND")
-            except Exception as e:
-                print(f"Lỗi tạo ví: {e}")
-                
-        elif choice == "2":
-            # Tạo và ký giao dịch
-            print("\nTẠO GIAO DỊCH")
-            from_user = input("Người gửi: ")
-            to_user = input("Người nhận: ")
-            try:
-                amount = int(input("Số tiền (VND): "))
-                
-                # Tạo giao dịch
-                transaction = create_transaction(from_user, to_user, amount)
-                
-                # Ký giao dịch
-                signed_tx = sign_transaction(transaction, from_user)
-                
-                print("Tạo và ký giao dịch thành công!")
-                print(f"ID giao dịch: {signed_tx['id']}")
-                print(f"Từ: {signed_tx['from']} → Đến: {signed_tx['to']}")
-                print(f"Số tiền: {signed_tx['amount']:,} VND")
-                print(f"Đã ký: {'Có' if signed_tx.get('signature') else 'Không'}")
-                
-            except ValueError:
-                print("Số tiền không hợp lệ!")
-            except Exception as e:
-                print(f"Lỗi tạo giao dịch: {e}")
-                
-        elif choice == "3":
-            # Xác thực giao dịch - CHỨC NĂNG CHÍNH
-            print("\nXÁC THỰC GIAO DỊCH")
-            print("Chọn cách xác thực:")
-            print("1. Xác thực giao dịch mới nhất")
-            print("2. Xác thực theo ID giao dịch")
-            
-            sub_choice = input("Chọn: ")
-            
-            try:
-                if sub_choice == "1":
-                    # Lấy giao dịch mới nhất để verify
-                    result = full_verification_flow()
-                    
-                elif sub_choice == "2":
-                    tx_id = input("Nhập ID giao dịch: ")
-                    result = full_verification_flow(tx_id)
-                    
-                else:
-                    print("Lựa chọn không hợp lệ!")
-                    continue
-                
-                # Hiển thị kết quả xác thực
-                print("\n🔍 KẾT QUẢ XÁC THỰC:")
-                print(f"Trạng thái: {'HỢP LỆ' if result['valid'] else ' KHÔNG HỢP LỆ'}")
-                print(f"Chữ ký: {'Đúng' if result['signature_valid'] else ' Sai'}")
-                print(f"Số dư: {'Đủ' if result['balance_valid'] else ' Không đủ'}")
-                print(f"Bảo mật: {'An toàn' if result['fraud_check'] else ' Nghi ngờ giả mạo'}")
-                
-                if result['message']:
-                    print(f"Chi tiết: {result['message']}")
-                    
-            except Exception as e:
-                print(f"Lỗi xác thực: {e}")
-                
-        elif choice == "4":
-            # Xem thông tin ví
-            print("\n--- THÔNG TIN VÍ ---")
-            name = input("Nhập tên chủ ví: ")
-            try:
-                wallet_info = get_wallet_info(name)
-                if wallet_info:
-                    print(f"Chủ ví: {wallet_info['name']}")
-                    print(f"Địa chỉ: {wallet_info['address']}")
-                    print(f"Số dư: {wallet_info['balance']:,} VND")
-                    print(f"Khóa công khai: {wallet_info['public_key'][:20]}...")
-                else:
-                    print("Không tìm thấy ví!")
-            except Exception as e:
-                print(f"Lỗi: {e}")
-                
-        elif choice == "0":
-            print("\n Cảm ơn bạn đã sử dụng hệ thống!")
-            print("Dự án: Xác thực giao dịch ví điện tử bằng chữ ký số ECDSA")
+def menu():
+    print("1. Tạo ví mới")
+    print("2. Xem thông tin ví")
+    print("3. Tạo giao dịch")
+    print("4. Danh sách giao dịch")
+    print("5. Xem chi tiết giao dịch")
+    print("6. Thoát")
+    return input("Chọn chức năng: ")
+
+def create_wallet_flow():
+    name = input("Nhập tên ví: ")
+    passphrase = getpass("Nhập passphrase để bảo vệ private key: ")
+    wallet = create_wallet(name, passphrase)
+    print(f"✅ Ví '{name}' đã tạo thành công!")
+    print(json_pretty(wallet))
+
+def show_wallet_info():
+    name = input("Nhập tên ví: ")
+    wallet = get_wallet_info(name)
+    if not wallet:
+        print("❌ Không tìm thấy ví")
+        return
+    safe_wallet = wallet.copy()
+    safe_wallet.pop("encrypted_private_key", None)
+    safe_wallet.pop("salt", None)
+    print(json_pretty(safe_wallet))
+
+def create_transaction_flow():
+
+    amount = int(input("Số tiền: "))
+    if amount <= 0:
+       print("❌ Số tiền phải lớn hơn 0")
+       return
+
+    from_user = input("Người gửi (tên ví): ")
+    to_user = input("Người nhận (tên ví): ")
+    amount = int(input("Số tiền: "))
+
+    from_wallet = get_wallet_info(from_user)
+    to_wallet = get_wallet_info(to_user)
+
+    if not from_wallet or not to_wallet:
+        print("❌ Ví không tồn tại")
+        return
+
+    if from_wallet["balance"] < amount:
+        print("❌ Số dư không đủ")
+        return
+
+    tx = {
+        "id": str(uuid.uuid4()),
+        "from": from_user,
+        "to": to_user,
+        "amount": amount,
+        "timestamp": time.time(),  # ký vẫn chấp nhận số; lưu file dùng ISO trong create_transaction() flow
+        "from_address": from_wallet["address"],
+        "to_address": to_wallet["address"],
+        "status": "created"
+    }
+
+    passphrase = getpass("Nhập passphrase của ví gửi để ký giao dịch: ")
+    try:
+        signed_tx = sign_transaction(tx, from_user, passphrase)
+        print("✅ Giao dịch đã ký thành công:")
+        print(json_pretty(signed_tx))
+
+        update_balance(from_user, from_wallet["balance"] - amount)
+        update_balance(to_user, to_wallet["balance"] + amount)
+
+    except Exception as e:
+        print("❌ Lỗi khi ký giao dịch:", str(e))
+        traceback.print_exc()
+
+def show_transactions():
+    """Danh sách giao dịch (list)"""
+    txs = load_transactions()
+    if not txs:
+        print("Chưa có giao dịch nào")
+        return
+
+    print("\n=== Danh sách giao dịch ===")
+    # txs là list
+    for tx in txs:
+        print(f"- ID: {tx.get('id')} | {tx.get('from')} -> {tx.get('to')} | {tx.get('amount')} | {tx.get('status', 'unknown')}")
+
+def show_transaction_detail():
+    """Hiển thị chi tiết một giao dịch"""
+    tx_id = input("Nhập Transaction ID: ")
+    txs = load_transactions()
+    tx = None
+    for t in txs:
+        if t.get("id") == tx_id:
+            tx = t
             break
-            
-        else:
-            print(" Lựa chọn không hợp lệ! Vui lòng chọn 0-4.")
-            
-        # Dừng một chút để user đọc kết quả
-        input("\nNhấn Enter để tiếp tục...")
+
+    if not tx:
+        print("❌ Không tìm thấy giao dịch")
+        return
+
+    print("\n=== Chi tiết giao dịch ===")
+    print(f"🔹 ID: {tx.get('id')}")
+    print(f"🔹 Người gửi: {tx.get('from')} ({tx.get('from_address')})")
+    print(f"🔹 Người nhận: {tx.get('to')} ({tx.get('to_address')})")
+    print(f"🔹 Số tiền: {tx.get('amount')}")
+    print(f"🔹 Thời gian: {tx.get('timestamp')}")
+    print(f"🔹 Trạng thái: {tx.get('status', 'unknown')}")
+    if tx.get("signature"):
+        print(f"🔹 Chữ ký: {tx.get('signature')}")
+
+def json_pretty(obj):
+    import json
+    return json.dumps(obj, indent=2, ensure_ascii=False)
 
 if __name__ == "__main__":
-    main()
+    while True:
+        choice = menu()
+        if choice == "1":
+            create_wallet_flow()
+        elif choice == "2":
+            show_wallet_info()
+        elif choice == "3":
+            create_transaction_flow()
+        elif choice == "4":
+            show_transactions()
+        elif choice == "5":
+            show_transaction_detail()
+        elif choice == "6":
+            print("Thoát chương trình...")
+            break
+        else:
+            print("❌ Lựa chọn không hợp lệ")

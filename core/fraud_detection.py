@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 
 def check_double_spending(transaction):
     """Kiểm tra chi tiêu kép"""
@@ -108,9 +108,9 @@ def check_amount_manipulation(transaction):
     try:
         amount = transaction.get("amount", 0)
         
-        # Kiểm tra số tiền hợp lý
-        if amount <= 0:
-            return False, "Số tiền phải lớn hơn 0"
+        # Cải thiện thông báo lỗi cho số âm hoặc 0
+        if amount < 0:
+            return False, "Số tiền phải lớn hơn 0 (không chấp nhận số âm hoặc 0)"
         
         if amount > 100000000:  # 100 triệu VND
             return False, "Số tiền quá lớn (>100 triệu VND)"
