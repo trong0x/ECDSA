@@ -21,9 +21,7 @@
             --dark: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             --glass: rgba(255, 255, 255, 0.15);
             --glass-border: rgba(255, 255, 255, 0.2);
-
-            --text-primary: #000c0a;
-            
+            --text-primary: #ffffff;
             --text-secondary: rgba(255, 255, 255, 0.8);
             --shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
             --shadow-hover: 0 35px 80px rgba(0, 0, 0, 0.4);
@@ -75,7 +73,7 @@
         .header h1 {
             font-size: 3.5rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #771212 0%, #c72525 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -125,6 +123,7 @@
             overflow: hidden;
             transform: translateZ(0);
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            cursor: pointer;
         }
 
         .nav-pill::before {
@@ -367,6 +366,7 @@
             position: relative;
             overflow: hidden;
             animation: slideIn 0.5s ease-out;
+            color: var(--text-primary);
         }
 
         .result-display.success {
@@ -546,21 +546,21 @@
 
         <nav class="nav-container">
             <div class="nav-pills">
-                <a href="#" class="nav-pill active" onclick="showSection('dashboard')">
+                <div class="nav-pill active" onclick="showSection('dashboard')">
                     <i class="fas fa-chart-bar"></i> Dashboard
-                </a>
-                <a href="#" class="nav-pill" onclick="showSection('create-wallet')">
+                </div>
+                <div class="nav-pill" onclick="showSection('create-wallet')">
                     <i class="fas fa-wallet"></i> Tạo ví mới
-                </a>
-                <a href="#" class="nav-pill" onclick="showSection('create-transaction')">
+                </div>
+                <div class="nav-pill" onclick="showSection('create-transaction')">
                     <i class="fas fa-exchange-alt"></i> Tạo giao dịch
-                </a>
-                <a href="#" class="nav-pill" onclick="showSection('verify-transaction')">
+                </div>
+                <div class="nav-pill" onclick="showSection('verify-transaction')">
                     <i class="fas fa-check-circle"></i> Xác thực giao dịch
-                </a>
-                <a href="#" class="nav-pill" onclick="showSection('wallet-info')">
+                </div>
+                <div class="nav-pill" onclick="showSection('wallet-info')">
                     <i class="fas fa-info-circle"></i> Thông tin ví
-                </a>
+                </div>
             </div>
         </nav>
 
@@ -607,7 +607,7 @@
                 <input id="wallet-passphrase" type="password" class="form-control" placeholder="Nhập passphrase">
             </div>
             <button onclick="createWallet()" class="btn"><i class="fas fa-plus"></i> Tạo ví</button>
-            <div id="create-wallet-result" class="result-display"></div>
+            <div id="create-wallet-result" class="result-display" style="display:none;"></div>
         </section>
 
         <!-- Create Transaction Section -->
@@ -630,7 +630,7 @@
                 <input id="tx-passphrase" type="password" class="form-control" placeholder="Nhập passphrase để ký giao dịch">
             </div>
             <button onclick="createTransaction()" class="btn"><i class="fas fa-paper-plane"></i> Tạo và ký giao dịch</button>
-            <div id="create-transaction-result" class="result-display"></div>
+            <div id="create-transaction-result" class="result-display" style="display:none;"></div>
         </section>
 
         <!-- Verify Transaction Section -->
@@ -651,7 +651,7 @@
                     Xác thực theo ID
                 </button>
             </div>
-            <div id="verify-transaction-result" class="result-display"></div>
+            <div id="verify-transaction-result" class="result-display" style="display:none;"></div>
         </section>
 
         <!-- Wallet Info Section -->
@@ -670,7 +670,7 @@
                 <i class="fas fa-eye"></i>
                 Xem thông tin
             </button>
-            <div id="wallet-info-result" class="result-display"></div>
+            <div id="wallet-info-result" class="result-display" style="display:none;"></div>
         </section>
     </div>
 
@@ -729,14 +729,14 @@
                 const recentTxDiv = document.getElementById('recent-transactions');
                 
                 recentTxDiv.innerHTML = '';
-                transactions.slice(-5).forEach(tx => {
+                transactions.slice(-5).reverse().forEach(tx => {
                     const txDiv = document.createElement('div');
                     txDiv.className = 'transaction-card';
                     txDiv.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <p style="font-weight: 600; color: white; margin-bottom: 0.5rem;">${tx.id}</p>
-                                <p style="color: rgba(255,255,255,0.8);">${tx.from} → ${tx.to}: ${tx.amount.toLocaleString()} VND</p>
+                                <p style="font-weight: 600; color: white; margin-bottom: 0.5rem;">${tx.id.substring(0, 16)}...</p>
+                                <p style="color: rgba(255,255,255,0.8);">${tx.from} → ${tx.to}: ${(tx.amount || 0).toLocaleString()} VND</p>
                             </div>
                             <div class="verification-status ${tx.status === 'verified' ? 'success' : 'error'}">
                                 <i class="fas ${tx.status === 'verified' ? 'fa-check-circle' : 'fa-times-circle'} status-icon"></i>
@@ -757,40 +757,43 @@
             const passphrase = document.getElementById('wallet-passphrase').value;
             const resultDiv = document.getElementById('create-wallet-result');
 
-        if (!name || !passphrase) {
-            resultDiv.innerHTML = '<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Vui lòng nhập tên ví và passphrase!</span></div>';
-            resultDiv.className = 'result-display error';
-            return;
-        }
-
-        try {
-            const response = await fetch('/api/create-wallet', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, passphrase })
-            });
-            const result = await response.json();
-
-            if (result.error) {
-                resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>${result.error}</span></div>`;
+            if (!name || !passphrase) {
+                resultDiv.innerHTML = '<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Vui lòng nhập tên ví và passphrase!</span></div>';
                 resultDiv.className = 'result-display error';
-            } else {
-                resultDiv.innerHTML = `
-                    <div class="verification-status success"><i class="fas fa-check-circle status-icon"></i><span>Tạo ví thành công!</span></div>
-                    <div style="margin-top: 1rem; color: white;">
-                    <p><strong>Tên:</strong> ${result.name}</p>
-                    <p><strong>Địa chỉ:</strong> ${result.address}</p>
-                    <p><strong>Số dư:</strong> ${result.balance.toLocaleString()} VND</p>
-                    </div>`;
-                resultDiv.className = 'result-display success';
-                populateWallets();
-                updateDashboard();
-                document.getElementById('wallet-name').value = '';
-                document.getElementById('wallet-passphrase').value = '';
+                resultDiv.style.display = 'block';
+                return;
             }
-        } catch (error) {
-            resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Lỗi: ${error.message}</span></div>`;
-            resultDiv.className = 'result-display error';
+
+            try {
+                const response = await fetch('/api/create-wallet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, passphrase })
+                });
+                const result = await response.json();
+
+                if (result.error) {
+                    resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>${result.error}</span></div>`;
+                    resultDiv.className = 'result-display error';
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="verification-status success"><i class="fas fa-check-circle status-icon"></i><span>Tạo ví thành công!</span></div>
+                        <div style="margin-top: 1rem; color: white;">
+                        <p><strong>Tên:</strong> ${result.name}</p>
+                        <p><strong>Địa chỉ:</strong> ${result.address}</p>
+                        <p><strong>Số dư:</strong> ${result.balance.toLocaleString()} VND</p>
+                        </div>`;
+                    resultDiv.className = 'result-display success';
+                    populateWallets();
+                    updateDashboard();
+                    document.getElementById('wallet-name').value = '';
+                    document.getElementById('wallet-passphrase').value = '';
+                }
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Lỗi: ${error.message}</span></div>`;
+                resultDiv.className = 'result-display error';
+                resultDiv.style.display = 'block';
             }
         }
 
@@ -799,12 +802,13 @@
             const fromUser = document.getElementById('from-user').value;
             const toUser = document.getElementById('to-user').value;
             const amount = parseInt(document.getElementById('amount').value);
-            const passphrase=document.getElementById('tx-passphrase').value;
+            const passphrase = document.getElementById('tx-passphrase').value;
             const resultDiv = document.getElementById('create-transaction-result');
             
             if (!fromUser || !toUser || !amount || !passphrase) {
                 resultDiv.innerHTML = '<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Vui lòng điền đầy đủ thông tin!</span></div>';
                 resultDiv.className = 'result-display error';
+                resultDiv.style.display = 'block';
                 return;
             }
             
@@ -812,7 +816,7 @@
                 const response = await fetch('/api/create-transaction', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ from_user: fromUser, to_user: toUser, amount , passphrase})
+                    body: JSON.stringify({ from_user: fromUser, to_user: toUser, amount, passphrase })
                 });
                 const result = await response.json();
                 
@@ -828,8 +832,9 @@
                         <div style="margin-top: 1rem; color: white;">
                             <p><strong>ID:</strong> ${result.id}</p>
                             <p><strong>Từ:</strong> ${result.from} → <strong>Đến:</strong> ${result.to}</p>
-                            <p><strong>Số tiền:</strong> ${result.amount.toLocaleString()} VND</p>
-                            <p><strong>Trạng thái:</strong> Đã ký</p>
+                            <p><strong>Số tiền:</strong> ${(result.amount || 0).toLocaleString()} VND</p>
+                            <p><strong>Trạng thái:</strong> ${result.status}</p>
+                            <p><strong>Chữ ký:</strong> ${(result.signature || '').substring(0, 32)}...</p>
                         </div>
                     `;
                     resultDiv.className = 'result-display success';
@@ -841,9 +846,11 @@
                     document.getElementById('amount').value = '';
                     document.getElementById('tx-passphrase').value = '';
                 }
+                resultDiv.style.display = 'block';
             } catch (error) {
                 resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Lỗi: ${error.message}</span></div>`;
                 resultDiv.className = 'result-display error';
+                resultDiv.style.display = 'block';
             }
         }
 
@@ -852,12 +859,17 @@
             const resultDiv = document.getElementById('verify-transaction-result');
             
             try {
-                const response = await fetch('/api/verify-transaction', { method: 'POST' });
+                const response = await fetch('/api/verify-transaction', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
                 const result = await response.json();
                 displayVerifyResult(result);
             } catch (error) {
                 resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Lỗi: ${error.message}</span></div>`;
                 resultDiv.className = 'result-display error';
+                resultDiv.style.display = 'block';
             }
         }
 
@@ -869,6 +881,7 @@
             if (!txId) {
                 resultDiv.innerHTML = '<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Vui lòng nhập ID giao dịch!</span></div>';
                 resultDiv.className = 'result-display error';
+                resultDiv.style.display = 'block';
                 return;
             }
             
@@ -883,6 +896,7 @@
             } catch (error) {
                 resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Lỗi: ${error.message}</span></div>`;
                 resultDiv.className = 'result-display error';
+                resultDiv.style.display = 'block';
             }
         }
 
@@ -916,6 +930,7 @@
                 </div>
             `;
             resultDiv.className = `result-display ${statusClass}`;
+            resultDiv.style.display = 'block';
             updateDashboard();
             
             // Clear input
@@ -930,6 +945,7 @@
             if (!name) {
                 resultDiv.innerHTML = '<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Vui lòng chọn ví!</span></div>';
                 resultDiv.className = 'result-display error';
+                resultDiv.style.display = 'block';
                 return;
             }
             
@@ -964,9 +980,11 @@
                     `;
                     resultDiv.className = 'result-display success';
                 }
+                resultDiv.style.display = 'block';
             } catch (error) {
                 resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Lỗi: ${error.message}</span></div>`;
                 resultDiv.className = 'result-display error';
+                resultDiv.style.display = 'block';
             }
         }
 
