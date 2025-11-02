@@ -3,13 +3,12 @@
 from ecdsa import VerifyingKey, SECP256k1
 import json
 import hashlib
-from core.wallet import get_wallet_info, update_balance
-from core.database import execute, fetch_one, _lock
+from core.wallet import get_wallet_info
+from core.database import  _lock
 from core.transaction import (
     get_transaction_by_id, 
     get_latest_transaction,
     update_transaction_status,
-    mark_transaction_executed
 )
 from core.fraud_detection import check_fraud
 

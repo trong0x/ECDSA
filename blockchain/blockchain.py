@@ -86,12 +86,10 @@ class Blockchain:
     
     def add_transaction(self, transaction):
         """Thêm giao dịch vào pending pool"""
-        # Kiểm tra transaction đã được verify chưa
         if transaction.get("status") != "verified":
             print(f"❌ Transaction {transaction['id'][:8]}... chưa được verify")
             return False
         
-        # Kiểm tra double-spending trong pending pool
         for pending_tx in self.pending_transactions:
             if (pending_tx.get("sender") == transaction.get("sender") and 
                 pending_tx["id"] != transaction["id"]):
@@ -99,8 +97,6 @@ class Blockchain:
         
         self.pending_transactions.append(transaction)
         print(f"📝 Transaction {transaction['id'][:8]}... added to pending pool")
-        
-        # Tự động mine nếu đủ số lượng
         if len(self.pending_transactions) >= self.max_transactions_per_block:
             self.mine_pending_transactions()
         

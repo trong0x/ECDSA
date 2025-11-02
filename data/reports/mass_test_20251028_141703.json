@@ -1,0 +1,27 @@
+{
+  "timestamp": "2025-10-28T14:17:03.162096",
+  "test_config": {
+    "num_accounts": 100,
+    "total_transactions": 0
+  },
+  "statistics": {
+    "total_transactions": 0,
+    "successful_transactions": 0,
+    "failed_transactions": 0,
+    "double_spending_detected": 0,
+    "replay_attacks_detected": 0,
+    "invalid_signatures": 0,
+    "insufficient_balance": 0
+  },
+  "blockchain_stats": {
+    "total_blocks": 1,
+    "total_transactions": 0,
+    "pending_transactions": 0,
+    "difficulty": 2,
+    "mining_reward": 100,
+    "total_mining_rewards": 0,
+    "latest_block_hash": "0004b5f9a87ef33dffae2a190d93ee555189fc9fad5428d81ca5ff750402fa2f",
+    "is_valid": true,
+    "storage": "SQLite3"
+  }
+}

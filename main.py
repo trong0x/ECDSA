@@ -14,13 +14,6 @@ def xoa_man_hinh():
     import os
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def in_tieu_de():
-    """In tiêu đề của hệ thống"""
-    print("┌" + "─"*68 + "┐")
-    print("│" + " "*15 + "HỆ THỐNG XÁC THỰC VÍ ĐIỆN TỬ" + " "*25 + "│")
-    print("│" + " "*12 + "Tích hợp ECDSA + Blockchain + Ganache" + " "*16 + "│")
-    print("└" + "─"*68 + "┘")
-
 def menu_chinh():
     """Hiển thị menu chính và nhận lựa chọn của người dùng"""
     print("\n" + "─"*70)
@@ -555,7 +548,7 @@ def ham_chinh():
     """Hàm chính điều khiển luồng của chương trình"""
     while True:
         xoa_man_hinh()
-        in_tieu_de()
+        
         
         lua_chon = menu_chinh()
         

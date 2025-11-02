@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔐 Hệ thống Ví Điện tử ECDSA</title>
+    <title>⚡ E-WALLET ECDSA | Blockchain 3D System</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
         * {
             margin: 0;
             padding: 0;
@@ -15,1026 +16,1368 @@
         }
 
         :root {
-            --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --dark: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            --glass: rgba(255, 255, 255, 0.15);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.8);
-            --shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-            --shadow-hover: 0 35px 80px rgba(0, 0, 0, 0.4);
+            --neon-blue: #00d9ff;
+            --neon-purple: #b400ff;
+            --neon-pink: #ff006e;
+            --neon-green: #00ff88;
+            --dark-bg: #0a0e27;
+            --card-bg: rgba(20, 25, 50, 0.85);
+            --glass: rgba(255, 255, 255, 0.05);
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
-            min-height: 100vh;
+            font-family: 'Share Tech Mono', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
+            color: var(--neon-blue);
             overflow-x: hidden;
+            min-height: 100vh;
             position: relative;
         }
 
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        body::before {
-            content: '';
+        /* 3D Background Animation */
+        .bg-animation {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(ellipse at top, rgba(255,255,255,0.1) 0%, transparent 50%);
-            pointer-events: none;
+            z-index: 0;
+            opacity: 0.3;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(180, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 0, 110, 0.1) 0%, transparent 50%);
+            animation: bgPulse 15s ease-in-out infinite;
+        }
+
+        @keyframes bgPulse {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.1);
+            }
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: 1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--neon-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-blue);
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100vh) translateX(50px);
+                opacity: 0;
+            }
         }
 
         .container {
             position: relative;
-            z-index: 2;
-            max-width: 1400px;
+            z-index: 10;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 2rem;
-            min-height: 100vh;
         }
 
-        .header {
+        /* 3D Glass Header */
+        .header-3d {
             text-align: center;
-            margin-bottom: 3rem;
-            animation: fadeInDown 1s ease-out;
-        }
-
-        .header h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 1rem;
-            text-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            transform: perspective(1000px) rotateX(15deg);
-        }
-
-        .header p {
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-            font-weight: 300;
-            letter-spacing: 0.5px;
-        }
-
-        .nav-container {
             margin-bottom: 3rem;
             perspective: 1000px;
         }
 
-        .nav-pills {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 1rem;
+        .logo-3d {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 80px rgba(0, 217, 255, 0.5);
+            animation: logoFloat 6s ease-in-out infinite;
+            transform-style: preserve-3d;
+        }
+
+        @keyframes logoFloat {
+
+            0%,
+            100% {
+                transform: translateY(0) rotateX(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotateX(5deg);
+            }
+        }
+
+        .subtitle-3d {
+            font-size: 1.3rem;
+            color: var(--neon-purple);
+            margin-top: 1rem;
+            letter-spacing: 4px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px var(--neon-purple), 0 0 20px var(--neon-purple);
+            }
+
+            to {
+                text-shadow: 0 0 20px var(--neon-purple), 0 0 40px var(--neon-purple);
+            }
+        }
+
+        /* Glass Morphism Cards */
+        .glass-card {
             background: var(--glass);
             backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 25px;
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-            transform: translateZ(0);
-            animation: slideInUp 1s ease-out 0.3s both;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
         }
 
-        .nav-pill {
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            padding: 1rem 2rem;
-            color: var(--text-primary);
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-            transform: translateZ(0);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            cursor: pointer;
+        .glass-card:hover {
+            transform: translateY(-10px) rotateX(5deg);
+            box-shadow:
+                0 20px 60px rgba(0, 217, 255, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
-        .nav-pill::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.6s;
-        }
-
-        .nav-pill:hover::before {
-            left: 100%;
-        }
-
-        .nav-pill:hover {
-            transform: translateY(-10px) scale(1.05);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            border-color: rgba(255,255,255,0.4);
-        }
-
-        .nav-pill.active {
-            background: var(--accent);
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 15px 35px rgba(79, 172, 254, 0.4);
-        }
-
-        .section {
-            background: var(--glass);
-            backdrop-filter: blur(25px);
-            border: 1px solid var(--glass-border);
-            border-radius: 25px;
-            padding: 2.5rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow);
-            opacity: 0;
-            transform: translateY(50px) rotateX(10deg);
-            animation: fadeInUp 0.8s ease-out forwards;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: var(--accent);
-            transform: scaleX(0);
-            transition: transform 0.8s ease;
-        }
-
-        .section:hover::before {
-            transform: scaleX(1);
-        }
-
-        .section.hidden {
-            display: none;
-        }
-
-        .section-title {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 2rem;
+        /* Status Bar with 3D effect */
+        .status-bar {
             display: flex;
-            align-items: center;
+            justify-content: space-around;
+            margin-bottom: 2rem;
             gap: 1rem;
         }
 
-        .section-title i {
-            background: var(--accent);
-            padding: 1rem;
+        .status-item {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(180, 0, 255, 0.1));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 217, 255, 0.3);
             border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.3);
-            animation: pulse 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.1); }
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-bottom: 3rem;
-        }
-
-        .stat-card {
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 2rem;
+            padding: 1.5rem;
             text-align: center;
+            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
-            transition: all 0.4s ease;
-            transform: translateZ(0);
         }
 
-        .stat-card::before {
+        .status-item::before {
             content: '';
             position: absolute;
             top: -50%;
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            transition: transform 0.6s ease;
-            transform: scale(0);
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
         }
 
-        .stat-card:hover::before {
-            transform: scale(1);
+        @keyframes shine {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            }
+
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+            }
         }
 
-        .stat-card:hover {
-            transform: translateY(-10px) scale(1.05);
-            box-shadow: var(--shadow-hover);
+        .status-item:hover {
+            transform: scale(1.05) translateZ(20px);
+            border-color: var(--neon-blue);
+            box-shadow: 0 10px 40px rgba(0, 217, 255, 0.4);
         }
 
-        .stat-number {
-            font-size: 3rem;
-            font-weight: 800;
-            background: var(--accent);
+        .status-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .status-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .status-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.5rem;
-            position: relative;
-            z-index: 1;
         }
 
-        .stat-label {
-            color: var(--text-secondary);
-            font-weight: 500;
-            font-size: 1.1rem;
-            position: relative;
-            z-index: 1;
+        /* 3D Navigation */
+        .nav-3d {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
         }
 
-        .form-group {
-            margin-bottom: 2rem;
-            position: relative;
-        }
-
-        .form-label {
-            display: block;
-            color: var(--text-primary);
-            font-weight: 600;
-            margin-bottom: 0.8rem;
-            font-size: 1.1rem;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 1.2rem 1.5rem;
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
+        .nav-btn-3d {
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(180, 0, 255, 0.1));
+            backdrop-filter: blur(10px);
+            border: 2px solid transparent;
             border-radius: 15px;
-            color: var(--text-primary);
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: rgba(79, 172, 254, 0.6);
-            box-shadow: 0 0 30px rgba(79, 172, 254, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .btn {
-            background: var(--accent);
-            border: none;
-            padding: 1.2rem 2.5rem;
-            border-radius: 15px;
-            color: white;
-            font-weight: 600;
-            font-size: 1.1rem;
+            padding: 2rem 1.5rem;
             cursor: pointer;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);
+            transform-style: preserve-3d;
         }
 
-        .btn::before {
+        .nav-btn-3d::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+        }
+
+        .nav-btn-3d:hover {
+            transform: translateY(-10px) scale(1.05) rotateX(10deg);
+            border-color: var(--neon-blue);
+            box-shadow:
+                0 20px 60px rgba(0, 217, 255, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-btn-3d:hover::before {
+            opacity: 0.1;
+        }
+
+        .nav-btn-3d.active {
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.3), rgba(180, 0, 255, 0.3));
+            border-color: var(--neon-blue);
+            box-shadow: 0 15px 50px rgba(0, 217, 255, 0.5);
+        }
+
+        .nav-btn-3d i {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 1rem;
+            color: var(--neon-blue);
+            transition: transform 0.3s;
+        }
+
+        .nav-btn-3d:hover i {
+            transform: scale(1.2) rotateY(360deg);
+        }
+
+        .nav-btn-3d span {
+            display: block;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+        }
+
+        /* Section Cards */
+        .section-3d {
+            display: none;
+            animation: fadeInUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .section-3d.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Form Elements with 3D effect */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--neon-blue);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        .form-control,
+        .form-select {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: rgba(0, 217, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 217, 255, 0.3);
+            border-radius: 10px;
+            color: var(--neon-blue);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            background: rgba(0, 217, 255, 0.1);
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .form-control::placeholder {
+            color: rgba(0, 217, 255, 0.4);
+        }
+
+        /* 3D Buttons */
+        .btn-3d {
+            padding: 1.2rem 2.5rem;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4);
+        }
+
+        .btn-3d::before {
             content: '';
             position: absolute;
             top: 50%;
             left: 50%;
             width: 0;
             height: 0;
-            background: rgba(255, 255, 255, 0.2);
             border-radius: 50%;
-            transition: all 0.6s ease;
+            background: rgba(255, 255, 255, 0.3);
             transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
         }
 
-        .btn:hover::before {
+        .btn-3d:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 50px rgba(0, 217, 255, 0.6);
+        }
+
+        .btn-3d:hover::before {
             width: 300px;
             height: 300px;
         }
 
-        .btn:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 20px 40px rgba(79, 172, 254, 0.6);
-        }
-
-        .btn:active {
+        .btn-3d:active {
             transform: translateY(-2px) scale(1.02);
         }
 
-        .result-display {
-            margin-top: 2rem;
-            padding: 2rem;
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            min-height: 100px;
-            position: relative;
-            overflow: hidden;
-            animation: slideIn 0.5s ease-out;
-            color: var(--text-primary);
-        }
-
-        .result-display.success {
-            border-left: 5px solid #10b981;
-        }
-
-        .result-display.error {
-            border-left: 5px solid #ef4444;
-        }
-
-        .transaction-card {
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
+        /* Transaction Cards with 3D */
+        .tx-card-3d {
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.05), rgba(180, 0, 255, 0.05));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            border-left: 4px solid var(--neon-blue);
             border-radius: 15px;
             padding: 1.5rem;
             margin-bottom: 1rem;
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            transform-style: preserve-3d;
         }
 
-        .transaction-card::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            width: 3px;
-            background: var(--accent);
-            transform: scaleY(0);
-            transition: transform 0.3s ease;
+        .tx-card-3d:hover {
+            transform: translateX(10px) translateZ(20px);
+            border-left-color: var(--neon-purple);
+            box-shadow: 0 10px 40px rgba(0, 217, 255, 0.3);
         }
 
-        .transaction-card:hover::before {
-            transform: scaleY(1);
+        .tx-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
         }
 
-        .transaction-card:hover {
-            transform: translateX(10px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        .tx-id {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-purple);
+            font-weight: 700;
         }
 
-        .floating-elements {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
+        .tx-badge {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .floating-element {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            animation: float 6s ease-in-out infinite;
+        .tx-badge.verified {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
+        .tx-badge.pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid #ffc107;
         }
 
-        .floating-element:nth-child(1) {
-            width: 80px;
-            height: 80px;
-            top: 10%;
-            left: 10%;
-            animation-delay: 0s;
+        .tx-badge.rejected {
+            background: rgba(255, 0, 110, 0.2);
+            color: var(--neon-pink);
+            border: 1px solid var(--neon-pink);
         }
 
-        .floating-element:nth-child(2) {
-            width: 120px;
-            height: 120px;
-            top: 20%;
-            right: 10%;
-            animation-delay: 2s;
+        /* Result Box */
+        .result-box {
+            background: rgba(0, 217, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--neon-blue);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 2rem;
+            display: none;
+            animation: slideIn 0.5s ease;
         }
 
-        .floating-element:nth-child(3) {
-            width: 60px;
-            height: 60px;
-            bottom: 20%;
-            left: 20%;
-            animation-delay: 4s;
-        }
-
-        @keyframes fadeInDown {
-            0% { opacity: 0; transform: translateY(-50px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideInUp {
-            0% { opacity: 0; transform: translateY(100px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fadeInUp {
-            0% { opacity: 0; transform: translateY(50px) rotateX(10deg); }
-            100% { opacity: 1; transform: translateY(0) rotateX(0); }
+        .result-box.show {
+            display: block;
         }
 
         @keyframes slideIn {
-            0% { opacity: 0; transform: translateX(-50px); }
-            100% { opacity: 1; transform: translateX(0); }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .verification-status {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
+        .result-box.success {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.3);
+        }
+
+        .result-box.error {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 40px rgba(255, 0, 110, 0.3);
+        }
+
+        /* Loading Animation */
+        .loading-3d {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            position: relative;
+        }
+
+        .loading-3d::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 5px solid var(--neon-blue);
+            border-color: var(--neon-blue) transparent var(--neon-purple) transparent;
+            animation: loading 1.2s linear infinite;
+        }
+
+        @keyframes loading {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 217, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
             border-radius: 10px;
-            margin: 0.5rem 0;
         }
 
-        .verification-status.success {
-            background: rgba(16, 185, 129, 0.2);
-            border: 1px solid rgba(16, 185, 129, 0.3);
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
         }
 
-        .verification-status.error {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid rgba(239, 68, 68, 0.3);
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
         }
 
-        .status-icon {
-            font-size: 1.2rem;
-        }
-
-        .success .status-icon {
-            color: #10b981;
-        }
-
-        .error .status-icon {
-            color: #ef4444;
-        }
-
+        /* Responsive */
         @media (max-width: 768px) {
-            .header h1 {
+            .logo-3d {
                 font-size: 2.5rem;
             }
 
-            .nav-pills {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .dashboard-grid {
+            .nav-3d {
                 grid-template-columns: 1fr;
             }
 
-            .container {
-                padding: 1rem;
+            .status-bar {
+                flex-direction: column;
             }
 
-            .section {
-                padding: 1.5rem;
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
+        }
+
+        /* Connection Status Indicator */
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 1rem 1.5rem;
+            background: rgba(0, 217, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--neon-blue);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .connection-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        .connection-status.offline .connection-dot {
+            background: var(--neon-pink);
+            box-shadow: 0 0 10px var(--neon-pink);
         }
     </style>
 </head>
+
 <body>
-    <div class="floating-elements">
-        <div class="floating-element"></div>
-        <div class="floating-element"></div>
-        <div class="floating-element"></div>
+    <!-- Background Effects -->
+    <div class="bg-animation"></div>
+    <div class="particles" id="particles"></div>
+
+    <!-- Connection Status -->
+    <div class="connection-status" id="connectionStatus">
+        <div class="connection-dot"></div>
+        <span>SYSTEM ONLINE</span>
     </div>
 
     <div class="container">
-        <header class="header">
-            <h1><i class="fas fa-shield-alt"></i> Hệ thống Ví Điện tử ECDSA</h1>
-            <p>Xác thực giao dịch bảo mật với chữ ký số</p>
-        </header>
+        <!-- Header -->
+        <div class="header-3d">
+            <h1 class="logo-3d">⚡ E-WALLET ECDSA</h1>
+            <p class="subtitle-3d">[ BLOCKCHAIN 3D SECURITY SYSTEM ]</p>
+        </div>
 
-        <nav class="nav-container">
-            <div class="nav-pills">
-                <div class="nav-pill active" onclick="showSection('dashboard')">
-                    <i class="fas fa-chart-bar"></i> Dashboard
-                </div>
-                <div class="nav-pill" onclick="showSection('create-wallet')">
-                    <i class="fas fa-wallet"></i> Tạo ví mới
-                </div>
-                <div class="nav-pill" onclick="showSection('create-transaction')">
-                    <i class="fas fa-exchange-alt"></i> Tạo giao dịch
-                </div>
-                <div class="nav-pill" onclick="showSection('verify-transaction')">
-                    <i class="fas fa-check-circle"></i> Xác thực giao dịch
-                </div>
-                <div class="nav-pill" onclick="showSection('wallet-info')">
-                    <i class="fas fa-info-circle"></i> Thông tin ví
-                </div>
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="status-icon">👛</span>
+                <div class="status-label">Total Wallets</div>
+                <div class="status-value" id="totalWallets">0</div>
             </div>
-        </nav>
+            <div class="status-item">
+                <span class="status-icon">💸</span>
+                <div class="status-label">Transactions</div>
+                <div class="status-value" id="totalTx">0</div>
+            </div>
+            <div class="status-item">
+                <span class="status-icon">✅</span>
+                <div class="status-label">Verified</div>
+                <div class="status-value" id="verifiedTx">0</div>
+            </div>
+            <div class="status-item">
+                <span class="status-icon">📊</span>
+                <div class="status-label">Success Rate</div>
+                <div class="status-value" id="successRate">0%</div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-3d">
+            <div class="nav-btn-3d active" onclick="showSection('dashboard')">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-btn-3d" onclick="showSection('create-wallet')">
+                <i class="fas fa-wallet"></i>
+                <span>Create Wallet</span>
+            </div>
+            <div class="nav-btn-3d" onclick="showSection('create-tx')">
+                <i class="fas fa-paper-plane"></i>
+                <span>New Transaction</span>
+            </div>
+            <div class="nav-btn-3d" onclick="showSection('verify')">
+                <i class="fas fa-shield-alt"></i>
+                <span>Verify TX</span>
+            </div>
+            <div class="nav-btn-3d" onclick="showSection('wallet-info')">
+                <i class="fas fa-info-circle"></i>
+                <span>Wallet Info</span>
+            </div>
+            <div class="nav-btn-3d" onclick="showSection('blockchain')">
+                <i class="fas fa-cubes"></i>
+                <span>Blockchain</span>
+            </div>
+        </div>
 
         <!-- Dashboard Section -->
-        <section id="dashboard" class="section">
-            <h2 class="section-title">
-                <i class="fas fa-chart-bar"></i>
-                Tổng quan hệ thống
-            </h2>
-            <div class="dashboard-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="total-wallets">0</div>
-                    <div class="stat-label">Tổng ví</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="total-transactions">0</div>
-                    <div class="stat-label">Tổng giao dịch</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="verified-transactions">0</div>
-                    <div class="stat-label">Đã xác thực</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="success-rate">0%</div>
-                    <div class="stat-label">Tỷ lệ thành công</div>
-                </div>
+        <div id="dashboard" class="section-3d active">
+            <div class="glass-card">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-line"></i>
+                    SYSTEM DASHBOARD
+                </h2>
+                <div id="recentTx"></div>
             </div>
-            <h3 class="section-title">
-                <i class="fas fa-history"></i>
-                Giao dịch gần đây
-            </h3>
-            <div id="recent-transactions"></div>
-        </section>
+        </div>
 
         <!-- Create Wallet Section -->
-        <section id="create-wallet" class="section hidden">
-            <h2 class="section-title"><i class="fas fa-wallet"></i> Tạo ví mới</h2>
-            <div class="form-group">
-                <label class="form-label">Tên chủ ví:</label>
-                <input id="wallet-name" type="text" class="form-control" placeholder="Nhập tên ví">
+        <div id="create-wallet" class="section-3d">
+            <div class="glass-card">
+                <h2 class="section-title">
+                    <i class="fas fa-wallet"></i>
+                    CREATE NEW WALLET
+                </h2>
+
+                <div class="form-group">
+                    <label class="form-label">Wallet Name:</label>
+                    <input type="text" id="walletName" class="form-control" placeholder="Enter wallet name...">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Passphrase:</label>
+                    <input type="password" id="walletPass" class="form-control"
+                        placeholder="Enter secure passphrase...">
+                </div>
+
+                <button class="btn-3d" onclick="createWallet()">
+                    <i class="fas fa-plus"></i> CREATE WALLET
+                </button>
+
+                <div id="walletResult" class="result-box"></div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Passphrase (bảo vệ private key):</label>
-                <input id="wallet-passphrase" type="password" class="form-control" placeholder="Nhập passphrase">
-            </div>
-            <button onclick="createWallet()" class="btn"><i class="fas fa-plus"></i> Tạo ví</button>
-            <div id="create-wallet-result" class="result-display" style="display:none;"></div>
-        </section>
+        </div>
 
         <!-- Create Transaction Section -->
-        <section id="create-transaction" class="section hidden">
-            <h2 class="section-title"><i class="fas fa-exchange-alt"></i> Tạo giao dịch</h2>
-            <div class="form-group">
-                <label class="form-label">Người gửi:</label>
-                <select id="from-user" class="form-control"><option value="">Chọn ví gửi</option></select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Người nhận:</label>
-                <select id="to-user" class="form-control"><option value="">Chọn ví nhận</option></select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Số tiền (VND):</label>
-                <input id="amount" type="number" class="form-control" placeholder="Nhập số tiền">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Passphrase của ví gửi:</label>
-                <input id="tx-passphrase" type="password" class="form-control" placeholder="Nhập passphrase để ký giao dịch">
-            </div>
-            <button onclick="createTransaction()" class="btn"><i class="fas fa-paper-plane"></i> Tạo và ký giao dịch</button>
-            <div id="create-transaction-result" class="result-display" style="display:none;"></div>
-        </section>
+        <div id="create-tx" class="section-3d">
+            <div class="glass-card">
+                <h2 class="section-title">
+                    <i class="fas fa-paper-plane"></i>
+                    NEW TRANSACTION
+                </h2>
 
-        <!-- Verify Transaction Section -->
-        <section id="verify-transaction" class="section hidden">
-            <h2 class="section-title">
-                <i class="fas fa-check-circle"></i>
-                Xác thực giao dịch
-            </h2>
-            <button onclick="verifyLatestTransaction()" class="btn" style="margin-bottom: 2rem;">
-                <i class="fas fa-search"></i>
-                Xác thực giao dịch mới nhất
-            </button>
-            <div class="form-group">
-                <label class="form-label">Hoặc nhập ID giao dịch:</label>
-                <input id="tx-id" type="text" class="form-control" placeholder="Nhập ID giao dịch">
-                <button onclick="verifyTransactionById()" class="btn" style="margin-top: 1rem;">
-                    <i class="fas fa-check"></i>
-                    Xác thực theo ID
+                <div class="form-group">
+                    <label class="form-label">From Wallet:</label>
+                    <select id="fromWallet" class="form-select">
+                        <option value="">Select sender...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">To Wallet:</label>
+                    <select id="toWallet" class="form-select">
+                        <option value="">Select receiver...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Amount (VND):</label>
+                    <input type="number" id="txAmount" class="form-control" placeholder="Enter amount...">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Passphrase:</label>
+                    <input type="password" id="txPass" class="form-control" placeholder="Enter passphrase to sign...">
+                </div>
+
+                <button class="btn-3d" onclick="createTransaction()">
+                    <i class="fas fa-lock"></i> SIGN & SEND
                 </button>
+
+                <div id="txResult" class="result-box"></div>
             </div>
-            <div id="verify-transaction-result" class="result-display" style="display:none;"></div>
-        </section>
+        </div>
+
+        <!-- Verify Section -->
+        <div id="verify" class="section-3d">
+            <div class="glass-card">
+                <h2 class="section-title">
+                    <i class="fas fa-shield-alt"></i>
+                    VERIFY TRANSACTION
+                </h2>
+
+                <button class="btn-3d" onclick="verifyLatest()" style="margin-bottom: 1.5rem;">
+                    <i class="fas fa-search"></i> VERIFY LATEST
+                </button>
+
+                <div class="form-group">
+                    <label class="form-label">Or Enter Transaction ID:</label>
+                    <input type="text" id="verifyTxId" class="form-control" placeholder="Enter transaction ID...">
+                </div>
+
+                <button class="btn-3d" onclick="verifyById()">
+                    <i class="fas fa-check"></i> VERIFY
+                </button>
+
+                <div id="verifyResult" class="result-box"></div>
+            </div>
+        </div>
 
         <!-- Wallet Info Section -->
-        <section id="wallet-info" class="section hidden">
-            <h2 class="section-title">
-                <i class="fas fa-info-circle"></i>
-                Thông tin ví
-            </h2>
-            <div class="form-group">
-                <label class="form-label">Tên chủ ví:</label>
-                <select id="wallet-info-name" class="form-control">
-                    <option value="">Chọn ví</option>
-                </select>
+        <div id="wallet-info" class="section-3d">
+            <div class="glass-card">
+                <h2 class="section-title">
+                    <i class="fas fa-info-circle"></i>
+                    WALLET INFORMATION
+                </h2>
+
+                <div class="form-group">
+                    <label class="form-label">Select Wallet:</label>
+                    <select id="infoWallet" class="form-select">
+                        <option value="">Select wallet...</option>
+                    </select>
+                </div>
+
+                <button class="btn-3d" onclick="getWalletInfo()">
+                    <i class="fas fa-eye"></i> VIEW INFO
+                </button>
+
+                <div id="infoResult" class="result-box"></div>
             </div>
-            <button onclick="getWalletInfo()" class="btn">
-                <i class="fas fa-eye"></i>
-                Xem thông tin
-            </button>
-            <div id="wallet-info-result" class="result-display" style="display:none;"></div>
-        </section>
+        </div>
+
+        <!-- Blockchain Section -->
+        <div id="blockchain" class="section-3d">
+            <div class="glass-card">
+                <h2 class="section-title">
+                    <i class="fas fa-cubes"></i>
+                    BLOCKCHAIN EXPLORER
+                </h2>
+
+                <div class="stats-grid">
+                    <div class="status-item">
+                        <span class="status-icon">📦</span>
+                        <div class="status-label">Total Blocks</div>
+                        <div class="status-value" id="totalBlocks">0</div>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-icon">🔗</span>
+                        <div class="status-label">Chain TXs</div>
+                        <div class="status-value" id="chainTx">0</div>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-icon">⚙️</span>
+                        <div class="status-label">Difficulty</div>
+                        <div class="status-value" id="difficulty">2</div>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-icon">⏳</span>
+                        <div class="status-label">Pending</div>
+                        <div class="status-value" id="pendingTx">0</div>
+                    </div>
+                </div>
+
+                <div id="blockchainBlocks"></div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Hàm hiển thị section
-        function showSection(sectionId) {
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.add('hidden');
-            });
-            document.querySelectorAll('.nav-pill').forEach(pill => {
-                pill.classList.remove('active');
-            });
-            document.getElementById(sectionId).classList.remove('hidden');
-            event.target.classList.add('active');
-        }
+        // Generate floating particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 50;
 
-        // Hàm lấy danh sách ví để populate dropdown
-        async function populateWallets() {
-            try {
-                const response = await fetch('/api/wallets');
-                const wallets = await response.json();
-                const fromSelect = document.getElementById('from-user');
-                const toSelect = document.getElementById('to-user');
-                const infoSelect = document.getElementById('wallet-info-name');
-                
-                fromSelect.innerHTML = '<option value="">Chọn ví gửi</option>';
-                toSelect.innerHTML = '<option value="">Chọn ví nhận</option>';
-                infoSelect.innerHTML = '<option value="">Chọn ví</option>';
-                
-                Object.keys(wallets).forEach(name => {
-                    const option = document.createElement('option');
-                    option.value = name;
-                    option.textContent = name;
-                    fromSelect.appendChild(option.cloneNode(true));
-                    toSelect.appendChild(option.cloneNode(true));
-                    infoSelect.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Lỗi lấy danh sách ví:', error);
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                container.appendChild(particle);
             }
         }
 
-        // Hàm lấy thống kê dashboard
+        createParticles();
+
+        // API Base URL - FIXED for local development
+        const API_BASE = window.location.origin;
+        const isOnline = API_BASE.includes('localhost') || API_BASE.includes('127.0.0.1');
+
+        // Update connection status
+        function updateConnectionStatus(online) {
+            const statusEl = document.getElementById('connectionStatus');
+            if (online) {
+                statusEl.classList.remove('offline');
+                statusEl.innerHTML = '<div class="connection-dot"></div><span>SYSTEM ONLINE</span>';
+            } else {
+                statusEl.classList.add('offline');
+                statusEl.innerHTML = '<div class="connection-dot"></div><span>OFFLINE MODE</span>';
+            }
+        }
+
+        // Mock data for offline mode
+        const mockWallets = {
+            alice: { name: 'alice', address: 'wallet_abc123', balance: 950000, nonce: 1, created_at: new Date().toISOString() },
+            bob: { name: 'bob', address: 'wallet_def456', balance: 1050000, nonce: 0, created_at: new Date().toISOString() }
+        };
+
+        const mockTransactions = [
+            { id: 'tx_001', from: 'alice', to: 'bob', amount: 50000, status: 'verified', timestamp: new Date().toISOString(), executed: true, nonce: 0 },
+            { id: 'tx_002', from: 'bob', to: 'alice', amount: 30000, status: 'pending', timestamp: new Date().toISOString(), executed: false, nonce: 0 }
+        ];
+
+        // Navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.section-3d').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn-3d').forEach(n => n.classList.remove('active'));
+
+            document.getElementById(sectionId).classList.add('active');
+            event.target.closest('.nav-btn-3d').classList.add('active');
+        }
+
+        // Load wallets
+        async function loadWallets() {
+            try {
+                let wallets;
+
+                if (isOnline) {
+                    const response = await fetch(`${API_BASE}/api/wallets`);
+                    if (!response.ok) throw new Error('API not available');
+                    wallets = await response.json();
+                } else {
+                    wallets = mockWallets;
+                }
+
+                const fromSelect = document.getElementById('fromWallet');
+                const toSelect = document.getElementById('toWallet');
+                const infoSelect = document.getElementById('infoWallet');
+
+                fromSelect.innerHTML = '<option value="">Select sender...</option>';
+                toSelect.innerHTML = '<option value="">Select receiver...</option>';
+                infoSelect.innerHTML = '<option value="">Select wallet...</option>';
+
+                Object.keys(wallets).forEach(name => {
+                    const wallet = wallets[name];
+                    const option = `<option value="${name}">${name} (${(wallet.balance || 0).toLocaleString()} VND)</option>`;
+                    fromSelect.innerHTML += option;
+                    toSelect.innerHTML += option;
+                    infoSelect.innerHTML += option;
+                });
+
+                updateConnectionStatus(true);
+            } catch (error) {
+                console.warn('Using offline mode:', error);
+                updateConnectionStatus(false);
+                // Still load mock data
+                const wallets = mockWallets;
+                const fromSelect = document.getElementById('fromWallet');
+                const toSelect = document.getElementById('toWallet');
+                const infoSelect = document.getElementById('infoWallet');
+
+                fromSelect.innerHTML = '<option value="">Select sender...</option>';
+                toSelect.innerHTML = '<option value="">Select receiver...</option>';
+                infoSelect.innerHTML = '<option value="">Select wallet...</option>';
+
+                Object.keys(wallets).forEach(name => {
+                    const wallet = wallets[name];
+                    const option = `<option value="${name}">${name} (${wallet.balance.toLocaleString()} VND)</option>`;
+                    fromSelect.innerHTML += option;
+                    toSelect.innerHTML += option;
+                    infoSelect.innerHTML += option;
+                });
+            }
+        }
+
+        // Update Dashboard
         async function updateDashboard() {
             try {
-                const response = await fetch('/api/fraud-statistics');
-                const stats = await response.json();
-                
-                document.getElementById('total-wallets').textContent = stats.total_wallets || 0;
-                document.getElementById('total-transactions').textContent = stats.total_transactions || 0;
-                document.getElementById('verified-transactions').textContent = stats.verified_transactions || 0;
-                document.getElementById('success-rate').textContent = stats.success_rate || '0%';
+                let stats, transactions;
 
-                const recentTxs = await fetch('/api/transactions');
-                const transactions = await recentTxs.json();
-                const recentTxDiv = document.getElementById('recent-transactions');
-                
-                recentTxDiv.innerHTML = '';
-                transactions.slice(-5).reverse().forEach(tx => {
-                    const txDiv = document.createElement('div');
-                    txDiv.className = 'transaction-card';
-                    txDiv.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <p style="font-weight: 600; color: white; margin-bottom: 0.5rem;">${tx.id.substring(0, 16)}...</p>
-                                <p style="color: rgba(255,255,255,0.8);">${tx.from} → ${tx.to}: ${(tx.amount || 0).toLocaleString()} VND</p>
+                if (isOnline) {
+                    const statsResponse = await fetch(`${API_BASE}/api/fraud-statistics`);
+                    if (statsResponse.ok) {
+                        stats = await statsResponse.json();
+                    } else {
+                        throw new Error('API not available');
+                    }
+
+                    const txResponse = await fetch(`${API_BASE}/api/transactions`);
+                    if (txResponse.ok) {
+                        transactions = await txResponse.json();
+                    } else {
+                        transactions = mockTransactions;
+                    }
+                } else {
+                    stats = {
+                        total_wallets: Object.keys(mockWallets).length,
+                        total_transactions: mockTransactions.length,
+                        verified_transactions: mockTransactions.filter(t => t.status === 'verified').length,
+                        success_rate: '50%'
+                    };
+                    transactions = mockTransactions;
+                }
+
+                document.getElementById('totalWallets').textContent = stats.total_wallets || 0;
+                document.getElementById('totalTx').textContent = stats.total_transactions || 0;
+                document.getElementById('verifiedTx').textContent = stats.verified_transactions || 0;
+                document.getElementById('successRate').textContent = stats.success_rate || '0%';
+
+                // Load recent transactions
+                const recentDiv = document.getElementById('recentTx');
+                recentDiv.innerHTML = '<h3 style="margin-bottom: 1.5rem; color: var(--neon-purple); font-family: Orbitron;">Recent Transactions</h3>';
+
+                transactions.slice(-10).reverse().forEach(tx => {
+                    const statusClass = tx.status === 'verified' ? 'verified' :
+                        tx.status === 'rejected' ? 'rejected' : 'pending';
+                    const nonceBadge = tx.nonce !== undefined ?
+                        `<span style="background: rgba(180, 0, 255, 0.2); color: var(--neon-purple); padding: 0.2rem 0.5rem; border-radius: 5px; font-size: 0.8rem; margin-left: 0.5rem;">NONCE: ${tx.nonce}</span>` : '';
+
+                    recentDiv.innerHTML += `
+                        <div class="tx-card-3d">
+                            <div class="tx-header">
+                                <div class="tx-id">${tx.id.substring(0, 16)}...</div>
+                                <div class="tx-badge ${statusClass}">${tx.status}</div>
                             </div>
-                            <div class="verification-status ${tx.status === 'verified' ? 'success' : 'error'}">
-                                <i class="fas ${tx.status === 'verified' ? 'fa-check-circle' : 'fa-times-circle'} status-icon"></i>
-                                <span>${tx.status}</span>
+                            <div style="color: var(--neon-blue); font-size: 1.1rem; margin: 0.5rem 0;">
+                                ${tx.from} → ${tx.to}
+                            </div>
+                            <div style="color: var(--neon-green); font-size: 1.2rem; font-weight: bold;">
+                                ${(tx.amount || 0).toLocaleString()} VND ${nonceBadge}
+                            </div>
+                            <div style="color: rgba(0,217,255,0.5); font-size: 0.85rem; margin-top: 0.5rem;">
+                                ${tx.timestamp ? new Date(tx.timestamp).toLocaleString() : ''}
+                                ${tx.executed ? ' • EXECUTED ✓' : ''}
                             </div>
                         </div>
                     `;
-                    recentTxDiv.appendChild(txDiv);
                 });
+
             } catch (error) {
-                console.error('Lỗi cập nhật dashboard:', error);
+                console.warn('Dashboard update error:', error);
+                updateConnectionStatus(false);
             }
         }
 
-        // Hàm tạo ví
+        // Create Wallet
         async function createWallet() {
-            const name = document.getElementById('wallet-name').value;
-            const passphrase = document.getElementById('wallet-passphrase').value;
-            const resultDiv = document.getElementById('create-wallet-result');
+            const name = document.getElementById('walletName').value;
+            const passphrase = document.getElementById('walletPass').value;
+            const resultDiv = document.getElementById('walletResult');
 
             if (!name || !passphrase) {
-                resultDiv.innerHTML = '<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Vui lòng nhập tên ví và passphrase!</span></div>';
-                resultDiv.className = 'result-display error';
-                resultDiv.style.display = 'block';
+                showResult(resultDiv, 'error', '❌ Please enter wallet name and passphrase!');
                 return;
             }
 
             try {
-                const response = await fetch('/api/create-wallet', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, passphrase })
-                });
-                const result = await response.json();
+                let result;
+
+                if (isOnline) {
+                    const response = await fetch(`${API_BASE}/api/create-wallet`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, passphrase })
+                    });
+
+                    result = await response.json();
+                } else {
+                    // Mock wallet creation
+                    result = {
+                        name,
+                        address: 'wallet_' + Math.random().toString(36).substr(2, 16),
+                        balance: 1000000,
+                        created_at: new Date().toISOString()
+                    };
+                    mockWallets[name] = result;
+                }
 
                 if (result.error) {
-                    resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>${result.error}</span></div>`;
-                    resultDiv.className = 'result-display error';
+                    showResult(resultDiv, 'error', `❌ ${result.error}`);
                 } else {
-                    resultDiv.innerHTML = `
-                        <div class="verification-status success"><i class="fas fa-check-circle status-icon"></i><span>Tạo ví thành công!</span></div>
-                        <div style="margin-top: 1rem; color: white;">
-                        <p><strong>Tên:</strong> ${result.name}</p>
-                        <p><strong>Địa chỉ:</strong> ${result.address}</p>
-                        <p><strong>Số dư:</strong> ${result.balance.toLocaleString()} VND</p>
-                        </div>`;
-                    resultDiv.className = 'result-display success';
-                    populateWallets();
+                    showResult(resultDiv, 'success', `
+                        ✅ WALLET CREATED SUCCESSFULLY<br><br>
+                        <strong>Name:</strong> ${result.name}<br>
+                        <strong>Address:</strong> ${result.address}<br>
+                        <strong>Balance:</strong> ${result.balance.toLocaleString()} VND<br>
+                        <strong>Created:</strong> ${new Date(result.created_at).toLocaleString()}
+                    `);
+
+                    document.getElementById('walletName').value = '';
+                    document.getElementById('walletPass').value = '';
+                    loadWallets();
                     updateDashboard();
-                    document.getElementById('wallet-name').value = '';
-                    document.getElementById('wallet-passphrase').value = '';
                 }
-                resultDiv.style.display = 'block';
             } catch (error) {
-                resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Lỗi: ${error.message}</span></div>`;
-                resultDiv.className = 'result-display error';
-                resultDiv.style.display = 'block';
+                showResult(resultDiv, 'error', `❌ Error: ${error.message}`);
             }
         }
 
-        // Hàm tạo giao dịch
+        // Create Transaction
         async function createTransaction() {
-            const fromUser = document.getElementById('from-user').value;
-            const toUser = document.getElementById('to-user').value;
-            const amount = parseInt(document.getElementById('amount').value);
-            const passphrase = document.getElementById('tx-passphrase').value;
-            const resultDiv = document.getElementById('create-transaction-result');
-            
+            const fromUser = document.getElementById('fromWallet').value;
+            const toUser = document.getElementById('toWallet').value;
+            const amount = parseInt(document.getElementById('txAmount').value);
+            const passphrase = document.getElementById('txPass').value;
+            const resultDiv = document.getElementById('txResult');
+
             if (!fromUser || !toUser || !amount || !passphrase) {
-                resultDiv.innerHTML = '<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Vui lòng điền đầy đủ thông tin!</span></div>';
-                resultDiv.className = 'result-display error';
-                resultDiv.style.display = 'block';
+                showResult(resultDiv, 'error', '❌ Please fill all fields!');
                 return;
             }
-            
+
             try {
-                const response = await fetch('/api/create-transaction', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ from_user: fromUser, to_user: toUser, amount, passphrase })
-                });
-                const result = await response.json();
-                
-                if (result.error) {
-                    resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>${result.error}</span></div>`;
-                    resultDiv.className = 'result-display error';
+                let result;
+
+                if (isOnline) {
+                    const response = await fetch(`${API_BASE}/api/create-transaction`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ from_user: fromUser, to_user: toUser, amount, passphrase })
+                    });
+
+                    result = await response.json();
                 } else {
-                    resultDiv.innerHTML = `
-                        <div class="verification-status success">
-                            <i class="fas fa-check-circle status-icon"></i>
-                            <span>Tạo giao dịch thành công!</span>
-                        </div>
-                        <div style="margin-top: 1rem; color: white;">
-                            <p><strong>ID:</strong> ${result.id}</p>
-                            <p><strong>Từ:</strong> ${result.from} → <strong>Đến:</strong> ${result.to}</p>
-                            <p><strong>Số tiền:</strong> ${(result.amount || 0).toLocaleString()} VND</p>
-                            <p><strong>Trạng thái:</strong> ${result.status}</p>
-                            <p><strong>Chữ ký:</strong> ${(result.signature || '').substring(0, 32)}...</p>
-                        </div>
-                    `;
-                    resultDiv.className = 'result-display success';
+                    // Mock transaction creation
+                    result = {
+                        id: 'tx_' + Math.random().toString(36).substr(2, 16),
+                        from: fromUser,
+                        to: toUser,
+                        amount,
+                        status: 'signed',
+                        signature: Math.random().toString(36).substr(2),
+                        timestamp: new Date().toISOString()
+                    };
+                    mockTransactions.push(result);
+                }
+
+                if (result.error) {
+                    showResult(resultDiv, 'error', `❌ ${result.error}`);
+                } else {
+                    showResult(resultDiv, 'success', `
+                        ✅ TRANSACTION CREATED & SIGNED<br><br>
+                        <strong>TX ID:</strong> ${result.id}<br>
+                        <strong>From:</strong> ${result.from} → <strong>To:</strong> ${result.to}<br>
+                        <strong>Amount:</strong> ${(result.amount || 0).toLocaleString()} VND<br>
+                        <strong>Status:</strong> ${result.status}<br>
+                        <strong>Signature:</strong> ${(result.signature || '').substring(0, 32)}...<br>
+                        <strong>Time:</strong> ${new Date(result.timestamp).toLocaleString()}
+                    `);
+
+                    document.getElementById('fromWallet').value = '';
+                    document.getElementById('toWallet').value = '';
+                    document.getElementById('txAmount').value = '';
+                    document.getElementById('txPass').value = '';
+                    loadWallets();
                     updateDashboard();
-                    
-                    // Clear form
-                    document.getElementById('from-user').value = '';
-                    document.getElementById('to-user').value = '';
-                    document.getElementById('amount').value = '';
-                    document.getElementById('tx-passphrase').value = '';
                 }
-                resultDiv.style.display = 'block';
             } catch (error) {
-                resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Lỗi: ${error.message}</span></div>`;
-                resultDiv.className = 'result-display error';
-                resultDiv.style.display = 'block';
+                showResult(resultDiv, 'error', `❌ Error: ${error.message}`);
             }
         }
 
-        // Hàm xác thực giao dịch mới nhất
-        async function verifyLatestTransaction() {
-            const resultDiv = document.getElementById('verify-transaction-result');
-            
+        // Verify Latest Transaction
+        async function verifyLatest() {
+            const resultDiv = document.getElementById('verifyResult');
+
             try {
-                const response = await fetch('/api/verify-transaction', { 
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({})
-                });
-                const result = await response.json();
-                displayVerifyResult(result);
-            } catch (error) {
-                resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Lỗi: ${error.message}</span></div>`;
-                resultDiv.className = 'result-display error';
-                resultDiv.style.display = 'block';
-            }
-        }
+                let result;
 
-        // Hàm xác thực giao dịch theo ID
-        async function verifyTransactionById() {
-            const txId = document.getElementById('tx-id').value;
-            const resultDiv = document.getElementById('verify-transaction-result');
-            
-            if (!txId) {
-                resultDiv.innerHTML = '<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Vui lòng nhập ID giao dịch!</span></div>';
-                resultDiv.className = 'result-display error';
-                resultDiv.style.display = 'block';
-                return;
-            }
-            
-            try {
-                const response = await fetch('/api/verify-transaction', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ tx_id: txId })
-                });
-                const result = await response.json();
-                displayVerifyResult(result);
-            } catch (error) {
-                resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Lỗi: ${error.message}</span></div>`;
-                resultDiv.className = 'result-display error';
-                resultDiv.style.display = 'block';
-            }
-        }
+                if (isOnline) {
+                    const response = await fetch(`${API_BASE}/api/verify-transaction`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({})
+                    });
 
-        // Hàm hiển thị kết quả xác thực
-        function displayVerifyResult(result) {
-            const resultDiv = document.getElementById('verify-transaction-result');
-            const statusClass = result.valid ? 'success' : 'error';
-            const statusIcon = result.valid ? 'fa-check-circle' : 'fa-times-circle';
-            
-            resultDiv.innerHTML = `
-                <div class="verification-status ${statusClass}">
-                    <i class="fas ${statusIcon} status-icon"></i>
-                    <span>Trạng thái: ${result.valid ? 'HỢP LỆ' : 'KHÔNG HỢP LỆ'}</span>
-                </div>
-                <div style="margin-top: 1.5rem; color: white; display: grid; gap: 1rem;">
-                    <div class="verification-status ${result.signature_valid ? 'success' : 'error'}">
-                        <i class="fas ${result.signature_valid ? 'fa-check' : 'fa-times'} status-icon"></i>
-                        <span>Chữ ký: ${result.signature_valid ? 'Đúng' : 'Sai'}</span>
-                    </div>
-                    <div class="verification-status ${result.balance_valid ? 'success' : 'error'}">
-                        <i class="fas ${result.balance_valid ? 'fa-check' : 'fa-times'} status-icon"></i>
-                        <span>Số dư: ${result.balance_valid ? 'Đủ' : 'Không đủ'}</span>
-                    </div>
-                    <div class="verification-status ${result.fraud_check ? 'success' : 'error'}">
-                        <i class="fas ${result.fraud_check ? 'fa-shield-alt' : 'fa-exclamation-triangle'} status-icon"></i>
-                        <span>Bảo mật: ${result.fraud_check ? 'An toàn' : 'Nghi ngờ'}</span>
-                    </div>
-                    ${result.message ? `<div style="padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 1rem;">
-                        <p><strong>Chi tiết:</strong> ${result.message}</p>
-                    </div>` : ''}
-                </div>
-            `;
-            resultDiv.className = `result-display ${statusClass}`;
-            resultDiv.style.display = 'block';
-            updateDashboard();
-            
-            // Clear input
-            document.getElementById('tx-id').value = '';
-        }
-
-        // Hàm lấy thông tin ví
-        async function getWalletInfo() {
-            const name = document.getElementById('wallet-info-name').value;
-            const resultDiv = document.getElementById('wallet-info-result');
-            
-            if (!name) {
-                resultDiv.innerHTML = '<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Vui lòng chọn ví!</span></div>';
-                resultDiv.className = 'result-display error';
-                resultDiv.style.display = 'block';
-                return;
-            }
-            
-            try {
-                const response = await fetch(`/api/wallet-info?name=${encodeURIComponent(name)}`);
-                const result = await response.json();
-                
-                if (result.error) {
-                    resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>${result.error}</span></div>`;
-                    resultDiv.className = 'result-display error';
+                    result = await response.json();
                 } else {
-                    resultDiv.innerHTML = `
-                        <div class="verification-status success">
-                            <i class="fas fa-check-circle status-icon"></i>
-                            <span>Thông tin ví</span>
-                        </div>
-                        <div style="margin-top: 1.5rem; color: white; display: grid; gap: 1rem;">
-                            <div style="padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 10px;">
-                                <p><strong>Chủ ví:</strong> ${result.name}</p>
-                            </div>
-                            <div style="padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 10px;">
-                                <p><strong>Địa chỉ:</strong> ${result.address}</p>
-                            </div>
-                            <div style="padding: 1rem; background: rgba(79, 172, 254, 0.2); border-radius: 10px; border: 1px solid rgba(79, 172, 254, 0.3);">
-                                <p style="font-size: 1.2rem;"><strong>Số dư:</strong> ${result.balance.toLocaleString()} VND</p>
-                            </div>
-                            <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 10px; font-family: monospace; word-break: break-all; font-size: 0.9rem;">
-                                <p><strong>Khóa công khai:</strong></p>
-                                <p style="margin-top: 0.5rem; opacity: 0.8;">${result.public_key.substring(0, 64)}...</p>
-                            </div>
-                        </div>
-                    `;
-                    resultDiv.className = 'result-display success';
+                    // Mock verification
+                    result = {
+                        valid: true,
+                        signature_valid: true,
+                        balance_valid: true,
+                        fraud_check: true,
+                        transaction_id: mockTransactions[mockTransactions.length - 1]?.id || 'N/A',
+                        transaction_status: 'verified',
+                        message: 'All checks passed (offline mode)'
+                    };
                 }
-                resultDiv.style.display = 'block';
+
+                displayVerifyResult(result);
             } catch (error) {
-                resultDiv.innerHTML = `<div class="verification-status error"><i class="fas fa-times-circle status-icon"></i><span>Lỗi: ${error.message}</span></div>`;
-                resultDiv.className = 'result-display error';
-                resultDiv.style.display = 'block';
+                showResult(resultDiv, 'error', `❌ Error: ${error.message}`);
             }
         }
 
-        // Khởi tạo trang
-        document.addEventListener('DOMContentLoaded', () => {
-            showSection('dashboard');
-            populateWallets();
-            updateDashboard();
-            
-            // Auto refresh dashboard every 30 seconds
-            setInterval(updateDashboard, 30000);
-        });
+        // Verify By ID
+        async function verifyById() {
+            const txId = document.getElementById('verifyTxId').value;
+            const resultDiv = document.getElementById('verifyResult');
 
-        // Add smooth scrolling và loading states
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('btn')) {
-                e.target.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    e.target.style.transform = '';
-                }, 150);
+            if (!txId) {
+                showResult(resultDiv, 'error', '❌ Please enter transaction ID!');
+                return;
             }
+
+            try {
+                let result;
+
+                if (isOnline) {
+                    const response = await fetch(`${API_BASE}/api/verify-transaction`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ tx_id: txId })
+                    });
+
+                    result = await response.json();
+                } else {
+                    // Mock verification
+                    result = {
+                        valid: true,
+                        signature_valid: true,
+                        balance_valid: true,
+                        fraud_check: true,
+                        transaction_id: txId,
+                        transaction_status: 'verified',
+                        message: 'Mock verification (offline mode)'
+                    };
+                }
+
+                displayVerifyResult(result);
+                document.getElementById('verifyTxId').value = '';
+            } catch (error) {
+                showResult(resultDiv, 'error', `❌ Error: ${error.message}`);
+            }
+        }
+
+        // Display Verify Result
+        function displayVerifyResult(result) {
+            const resultDiv = document.getElementById('verifyResult');
+            const status = result.valid ? 'success' : 'error';
+            const icon = result.valid ? '✅' : '❌';
+
+            const sigIcon = result.signature_valid ? '✅' : '❌';
+            const balIcon = result.balance_valid ? '✅' : '❌';
+            const fraudIcon = result.fraud_check ? '🛡️' : '⚠️';
+
+            showResult(resultDiv, status, `
+                ${icon} <strong>VERIFICATION ${result.valid ? 'PASSED' : 'FAILED'}</strong><br><br>
+                ${sigIcon} <strong>Signature:</strong> ${result.signature_valid ? 'VALID' : 'INVALID'}<br>
+                ${balIcon} <strong>Balance:</strong> ${result.balance_valid ? 'SUFFICIENT' : 'INSUFFICIENT'}<br>
+                ${fraudIcon} <strong>Security:</strong> ${result.fraud_check ? 'PASSED' : 'FAILED'}<br><br>
+                <strong>TX ID:</strong> ${result.transaction_id || 'N/A'}<br>
+                <strong>Status:</strong> ${result.transaction_status || 'N/A'}<br>
+                <div style="margin-top: 1rem; padding: 1rem; background: rgba(0,20,40,0.6); border-radius: 10px;">
+                    <strong>Details:</strong><br>${result.message}
+                </div>
+            `);
+
+            updateDashboard();
+        }
+
+        // Get Wallet Info
+        async function getWalletInfo() {
+            const name = document.getElementById('infoWallet').value;
+            const resultDiv = document.getElementById('infoResult');
+
+            if (!name) {
+                showResult(resultDiv, 'error', '❌ Please select a wallet!');
+                return;
+            }
+
+            try {
+                let result;
+
+                if (isOnline) {
+                    const response = await fetch(`${API_BASE}/api/wallet-info?name=${encodeURIComponent(name)}`);
+                    result = await response.json();
+                } else {
+                    result = mockWallets[name] || { error: 'Wallet not found' };
+                }
+
+                if (result.error) {
+                    showResult(resultDiv, 'error', `❌ ${result.error}`);
+                } else {
+                    showResult(resultDiv, 'success', `
+                        ℹ️ <strong>WALLET INFORMATION</strong><br><br>
+                        <strong>Name:</strong> ${result.name}<br>
+                        <strong>Address:</strong> ${result.address}<br>
+                        <strong>Balance:</strong> ${result.balance.toLocaleString()} VND<br>
+                        <strong>Nonce:</strong> ${result.nonce || 0}<br>
+                        <strong>Created:</strong> ${new Date(result.created_at).toLocaleString()}<br><br>
+                        <div style="padding: 1rem; background: rgba(0,20,40,0.6); border-radius: 10px; word-break: break-all;">
+                            <strong>Public Key:</strong><br>
+                            <span style="font-size: 0.85rem; color: var(--neon-purple);">${result.public_key ? result.public_key.substring(0, 64) + '...' : 'N/A'}</span>
+                        </div>
+                    `);
+                }
+            } catch (error) {
+                showResult(resultDiv, 'error', `❌ Error: ${error.message}`);
+            }
+        }
+
+        // Show Result Helper
+        function showResult(element, type, message) {
+            element.className = `result-box show ${type}`;
+            element.innerHTML = message;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadWallets();
+            updateDashboard();
+
+            // Auto-refresh every 10 seconds
+            setInterval(() => {
+                updateDashboard();
+            }, 10000);
         });
 
-        // Add keyboard shortcuts
+        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.altKey) {
-                switch(e.key) {
-                    case '1':
-                        e.preventDefault();
-                        showSection('dashboard');
-                        break;
-                    case '2':
-                        e.preventDefault();
-                        showSection('create-wallet');
-                        break;
-                    case '3':
-                        e.preventDefault();
-                        showSection('create-transaction');
-                        break;
-                    case '4':
-                        e.preventDefault();
-                        showSection('verify-transaction');
-                        break;
-                    case '5':
-                        e.preventDefault();
-                        showSection('wallet-info');
-                        break;
+                const shortcuts = {
+                    '1': 'dashboard',
+                    '2': 'create-wallet',
+                    '3': 'create-tx',
+                    '4': 'verify',
+                    '5': 'wallet-info',
+                    '6': 'blockchain'
+                };
+
+                if (shortcuts[e.key]) {
+                    e.preventDefault();
+                    showSection(shortcuts[e.key]);
+                    document.querySelector(`[onclick="showSection('${shortcuts[e.key]}')"]`).click();
                 }
             }
         });
+
+        // Console Easter Egg
+        console.log('%c⚡ E-WALLET ECDSA 3D SYSTEM', 'color: #00d9ff; font-size: 24px; font-weight: bold; text-shadow: 0 0 10px #00d9ff;');
+        console.log('%c🔐 Blockchain Security Enabled', 'color: #b400ff; font-size: 16px;');
+        console.log('%c⚠️  Unauthorized access is monitored', 'color: #ff006e; font-size: 14px;');
+        console.log('%c\nKeyboard Shortcuts:\nAlt+1: Dashboard\nAlt+2: Create Wallet\nAlt+3: New Transaction\nAlt+4: Verify\nAlt+5: Wallet Info\nAlt+6: Blockchain', 'color: #00ff88; font-size: 12px;');
     </script>
 </body>
+
 </html>
